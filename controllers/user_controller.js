@@ -1,0 +1,153 @@
+const userData = require("../dataAccessModule/user_data");
+const sendErrorResponse = require("../utils/sendErrorResponse");
+const ACCOUNT_STATUS = require("../config/verify_status");
+
+const removeUser = async (req, res) => {
+  try {
+    const userId = req?.params?.id;
+    if (!userId) {
+      return sendErrorResponse(res, 400, "Incomplete information!");
+    }
+    const result = await userData.deleteUser(userId);
+    if (result.affectedRows > 0) {
+      return res.status(200).json({
+          success: true,
+          message: `successfully deleted user : ${userId}`
+      });
+    }
+    return sendErrorResponse(res, 409, "Unable to remove user");
+  } catch (error) {
+    return sendErrorResponse(res, 500, "Internal server error!");
+  }
+};
+
+const getPageUser = async (req, res) => {
+  try {
+    const page = req?.params?.page;
+    if (!page) {
+      return sendErrorResponse(res, 400, "Incomplete information!");
+    }
+
+    const result = await userData.getPageUser(page);
+    if (!result) {
+      return sendErrorResponse(res,404,"Not found, unable to show users!");
+    }
+    return res.status(200).json({
+        success: true,
+        message: `successfully loaded page ${page} users!`,
+        body: result,
+    });
+  } catch (error) {
+    return sendErrorResponse(res, 500, "Internal server error!");
+  }
+};
+
+const getUser = async (req, res) => {
+  try {
+    const userId = req?.params?.id;
+    const userRole = req.userRole;
+
+    if (!userId) {
+      return sendErrorResponse(res, 400, "Incomplete information!");
+    }
+
+    const result = userRole === 3000 ? await userData.getUser(userId) : 
+    await userData.getUserInfo(userId);
+
+    if (result) {
+      return res.status(200).json({
+          success: true,
+          message: `successfully retrieved user : ${userId}`,
+          body: result,
+      });
+    } else {
+      return res.status(200).json({
+          success: false,
+          message: `No users found with ${userId} id!`,
+          body: result,
+      });
+    }
+  } catch (error) {
+    return sendErrorResponse(res, 500, "Internal server error!");
+  }
+};
+
+const suspendUser = async (req, res) => {
+  try {
+    const userId = req?.params?.id;
+    if (!userId) {
+      return sendErrorResponse(res, 400, "Incomplete information!");
+    }
+
+    const result = await userData.changeUserStatus(userId, ACCOUNT_STATUS.SUSPENDED);
+    if (result.affectedRows < 1) {
+      return res.status(200).json({
+          success: false,
+          message: `No users found with ${userId} id!`,
+          body: result,
+      });
+    } else {
+      return res.status(200).json({
+          success: true,
+          message: `successfully suspended user : ${userId}`,
+          body: result,
+      });
+    }
+  } catch (error) {
+    return sendErrorResponse(res, 500, "Internal server error!");
+  }
+};
+
+const activateUser = async (req, res) => {
+  try {
+    const userId = req?.params?.id;
+
+    if (!userId) {
+      return sendErrorResponse(res, 400, "Incomplete information!");
+    }
+
+    const result = await userData.changeUserStatus(userId, ACCOUNT_STATUS.ACTIVE);
+    if (result.affectedRows < 1) {
+      return res.status(200).json({
+          success: false,
+          message: `No users found with ${userId} id`,
+          body: result,
+      });
+    } else {
+      return res.status(200).json({
+          success: true,
+          message: `successfully activated user : ${userId}`,
+          body: result,
+      });
+    }
+  } catch (error) {
+    return sendErrorResponse(res, 500, "Internal server error!");
+  }
+};
+
+
+const getContactInformation = async (req, res) => {
+  try {
+    const userId = req?.params?.id;
+    if (!userId) {
+      return sendErrorResponse(res, 400, "Incomplete information!");
+    }
+    const result = await userData.getContactInfo(userId);
+    return res.status(200).json({
+        success: false,
+        message: `Loading contact information of the user!`,
+        body: result,
+    });
+  } catch (error) {
+    return sendErrorResponse(res, 500, "Internal server error!");
+  }
+};
+
+module.exports = {
+  getPageUser,
+  getUser,
+  suspendUser,
+  removeUser,
+  getContactInformation,
+  activateUser,
+};

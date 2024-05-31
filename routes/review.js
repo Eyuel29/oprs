@@ -1,8 +1,8 @@
 const router  = require('express').Router();
-const verifyRoles = require('../middlewares/auth/verifyRoles');
-const ROLES_LIST = require('../config/ROLES');
-const reviewController = require('../controllers/review/reviewController');
-const { verifyUserSession } = require('../middlewares/auth/verifyUserSession');
+const verifyRoles = require('../middlewares/verify_roles');
+const ROLES_LIST = require('../config/roles');
+const reviewController = require('../controllers/review_controller');
+const { verifyUserSession } = require('../middlewares/verify_user_session');
 
 router.get('/user/:id',verifyUserSession, verifyRoles(ROLES_LIST.LANDLORD, ROLES_LIST.TENANT),reviewController.getUserReviews);
 router.get('/listing/:id',verifyUserSession, verifyRoles(ROLES_LIST.LANDLORD, ROLES_LIST.TENANT),reviewController.getListingReviews);

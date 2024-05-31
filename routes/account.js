@@ -1,10 +1,10 @@
 const router = require('express').Router();
-const verifyController = require('../controllers/account/verifyController');
-const logoutController = require('../controllers/account/logoutController');
-const { verifyUserSession } = require('../middlewares/auth/verifyUserSession');
+const verifyController = require('../controllers/verify_controller');
+const { verifyUserSession } = require('../middlewares/verify_user_session');
+const verifyActive = require('../middlewares/verify_active');
 
-router.get('/logout', verifyUserSession,logoutController.logout_get);
-router.post('/verify', verifyUserSession,verifyController.verify_post);
+router.get('/logout', verifyUserSession,verifyActive,);
+router.post('/verify/:key', verifyUserSession,verifyController.verify_post);
 router.get('/verify', verifyUserSession,verifyController.verify_get);
 
 module.exports = router;
