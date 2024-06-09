@@ -21,11 +21,7 @@ const getListingCount = async (filterModel) => {
     let AND = '';
 
     for (const property in filterModel) {
-        
-        if(whereClause){
-            AND = 'AND';
-        }
-        
+      if(whereClause) AND = 'AND';  
       if (filterModel.hasOwnProperty(property)) {
         const value = filterModel[property];
         switch (typeof value) {
@@ -50,18 +46,18 @@ const getListingCount = async (filterModel) => {
         }
       }
     }
-    const selectionQuery = `
-      SELECT
-        COUNT(*) AS listing_count FROM listing
-      ${whereClause ? `WHERE ${whereClause.slice(4)}` : ''};`;
+
+    const selectionQuery = `SELECT COUNT(*) AS listing_count FROM listing ${whereClause ? `WHERE ${whereClause.slice(4)}` : ''};`;
+
     const [rows] = await connection.execute(selectionQuery);
-    return rows;
+    return rows[0];
   } catch (err) {
     throw err;
   } finally {
     connection.release();
   }
 }
+
 const getListingPage = async (page, filterModel) => {
     const connection = await pool.getConnection();
     try {
@@ -70,43 +66,33 @@ const getListingPage = async (page, filterModel) => {
       let AND = '';
 
       for (const property in filterModel) {
-        if(whereClause){
-            AND = 'AND';
-        }
-        
-      if (filterModel.hasOwnProperty(property)) {
-        const value = filterModel[property];
-        switch (typeof value) {
-          case 'string':
-            if (property === 'latitude' || property === 'longitude') {
-                whereClause += ` ${AND} listing.${property} like '${value.substring(0,5)}'`;
-            }else{
-                whereClause += ` ${AND} listing.${property} = '${value}'`;
-            }
-            break;
-          case 'number':
-            if (property === 'minimum_price') {
-              whereClause += ` ${AND} listing.price_per_duration > ${value}`;
-            } else if (property === 'maximum_price') {
-                whereClause += ` ${AND} listing.price_per_duration < ${value}`;
-            }else {
-              whereClause += ` ${AND} listing.${property} = ${value}`;
-            }
-            break;
-          default:
-            break;
+        if(whereClause) AND = 'AND';
+        if (filterModel.hasOwnProperty(property)) {
+          const value = filterModel[property];
+          switch (typeof value) {
+            case 'string':
+              if (property === 'latitude' || property === 'longitude') {
+                  whereClause += ` ${AND} listing.${property} like '${value.substring(0,5)}'`;
+              }else{
+                  whereClause += ` ${AND} listing.${property} = '${value}'`;
+              }
+              break;
+            case 'number':
+              if (property === 'minimum_price') {
+                whereClause += ` ${AND} listing.price_per_duration > ${value}`;
+              } else if (property === 'maximum_price') {
+                  whereClause += ` ${AND} listing.price_per_duration < ${value}`;
+              }else {
+                whereClause += ` ${AND} listing.${property} = ${value}`;
+              }
+              break;
+            default:
+              break;
+          }
         }
       }
-      }
-      const selectionQuery = `
-        SELECT
-          listing.*,
-          (SELECT JSON_ARRAYAGG(amenities.name) FROM amenities WHERE amenities.listing_id = listing.listing_id) AS amenities,
-          (SELECT COUNT(*) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS review_count,
-          (SELECT FLOOR(AVG(rating)) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS average_rating,
-          (SELECT JSON_ARRAYAGG(describing_terms.term) FROM describing_terms WHERE describing_terms.listing_id = listing.listing_id) AS describing_terms,
-          (SELECT JSON_ARRAYAGG(listing_photos.url) FROM listing_photos WHERE listing_photos.listing_id = listing.listing_id) AS photo_urls
-        FROM listing
+      const selectionQuery = 
+      `SELECT listing.*,(SELECT JSON_ARRAYAGG(amenities.name) FROM amenities WHERE amenities.listing_id = listing.listing_id) AS amenities,(SELECT COUNT(*) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS review_count,(SELECT FLOOR(AVG(rating)) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS average_rating,(SELECT JSON_ARRAYAGG(describing_terms.term) FROM describing_terms WHERE describing_terms.listing_id = listing.listing_id) AS describing_terms,(SELECT JSON_ARRAYAGG(listing_photos.url) FROM listing_photos WHERE listing_photos.listing_id = listing.listing_id) AS photo_urls FROM listing
         ${whereClause ? `WHERE ${whereClause.slice(4)}` : ''} LIMIT 20 OFFSET ${offset};`;
       const [rows] = await connection.execute(selectionQuery);
       return rows;
@@ -120,14 +106,7 @@ const getOwnerListing = async (owner_id) => {
     const connection = await pool.getConnection();
     try {
         const [rows] = await connection.execute(
-        `SELECT
-        listing.*,
-        (SELECT JSON_ARRAYAGG(amenities.name) FROM amenities WHERE amenities.listing_id = listing.listing_id) AS amenities,
-        (SELECT COUNT(*) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS review_count,
-        (SELECT FLOOR(AVG(rating)) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS average_rating,
-        (SELECT JSON_ARRAYAGG(describing_terms.term) FROM describing_terms WHERE describing_terms.listing_id = listing.listing_id) AS describing_terms,
-        (SELECT JSON_ARRAYAGG(listing_photos.url) FROM listing_photos WHERE listing_photos.listing_id = listing.listing_id) AS photo_urls
-        FROM listing WHERE listing.owner_id = ?;`, [owner_id]); // <-- Pass owner_id as a parameter
+        `SELECT listing.*,(SELECT JSON_ARRAYAGG(amenities.name) FROM amenities WHERE amenities.listing_id = listing.listing_id) AS amenities,(SELECT COUNT(*) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS review_count,(SELECT FLOOR(AVG(rating)) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS average_rating,(SELECT JSON_ARRAYAGG(describing_terms.term) FROM describing_terms WHERE describing_terms.listing_id = listing.listing_id) AS describing_terms,(SELECT JSON_ARRAYAGG(listing_photos.url) FROM listing_photos WHERE listing_photos.listing_id = listing.listing_id) AS photo_urls FROM listing WHERE listing.owner_id = ?;`, [owner_id]);
         return rows;
     } catch (err) {
         throw err;
@@ -143,71 +122,128 @@ const viewListing = async (listingId) =>{
     } catch (err) {
         throw err;
     }finally{
-        connection.release();
+        connection.release(); 
     }
 }
-const createListing = async (listing) =>{
-    const connection = await pool.getConnection();
-    try {
-        const [rows] = await connection.execute(`INSERT INTO listing(
-        listing_id,owner_id,type,title,description,sub_city,woreda,area_name,
-        latitude,longitude,price_per_duration,payment_currency,total_area_square_meter,listing_status,floor_number,
-        distance_from_road_in_meters,security_guards,lease_duration_days,tax_responsibility,
-        building_name,catering_rooms,back_stages,furnished,backrooms,displays,storage_capacity_square_meter,
-        customer_service_desks,number_of_bedrooms,number_of_bathrooms,number_of_kitchens,parking_capacity,
-        ceiling_height_in_meter,number_of_floors,loading_docks,guest_capacity) 
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`,
-         Object.values(listing));    
-        return rows;
-    } catch (err) {
-        throw err;
-    }finally{
-        connection.release();
-    }
-}
-const removeListing = async (listingId) =>{
-    const connection = await pool.getConnection();
-    try {
-        const [rows] = await connection.execute('DELETE FROM listing WHERE listing_id = ?;', [listingId]);
-        return rows;
-    } catch (err) {
-        throw err;
-    }finally{
-        connection.release();
-    }
-}
-const modifyListing = async (listingId, newListing) => {
-    const connection = await pool.getConnection();
-    try {
-      const SET_CLAUSES = Object.keys(newListing)
-        .map(key => `${key} = ?`)
-        .join(', ');
-        const query = `
-            UPDATE listing
-            SET ${SET_CLAUSES}
-            WHERE listing_id = ?;
-        `;
-  
-        const values = [
-            ...Object.values(newListing),
-            listingId, 
-        ];
-  
-        const [rows] = await connection.execute(query, values);
-        return rows;
-    } catch (err) {
+
+
+const createListing = async (listing, amenities, describing_terms) =>{
+  const connection = await pool.getConnection();
+  await connection.beginTransaction();
+  try {
+      const [rows] = await connection.execute(`INSERT INTO listing(
+      owner_id,
+      type,
+      title,
+      description,
+      sub_city,
+      woreda,
+      area_name,
+      latitude,
+      longitude,
+      price_per_duration,
+      payment_currency,
+      total_area_square_meter,
+      listing_status,
+      floor_number,
+      distance_from_road_in_meters,
+      security_guards,
+      lease_duration_days,
+      tax_responsibility,
+      building_name,
+      catering_rooms,
+      back_stages,
+      date_created,
+      furnished,
+      backrooms,
+      displays,
+      storage_capacity_square_meter,
+      customer_service_desks,
+      number_of_bedrooms,
+      number_of_bathrooms,
+      number_of_kitchens,
+      parking_capacity,
+      ceiling_height_in_meter,
+      number_of_floors,
+      loading_docks,
+      guest_capacity
+      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`,
+       Object.values(listing));
+
+      if(amenities && amenities.length > 0){
+        const amenitiesPlaceholders = amenities.map(() => '(?, ?)').join(',');
+        const amenitiesValues = []; 
+        Object.values(amenities).map((v, i) => {
+          amenitiesValues.push(rows.insertId);
+          amenitiesValues.push(v);
+        });
+        const amenitiesQuery = `INSERT INTO amenities (listing_id,name) VALUES ${amenitiesPlaceholders}`;
+        await connection.execute(amenitiesQuery, amenitiesValues);
+      }
+
+      if (describing_terms && describing_terms.length > 0) {
+          console.log(typeof describing_terms);
+          const dTplaceholders = describing_terms.map(() => '(?, ?)').join(',');
+          const dTvalues = []; 
+          Object.values(describing_terms).map((v, i) => {
+            dTvalues.push(rows.insertId);
+            dTvalues.push(v);
+          });
+          const dTquery = `INSERT INTO describing_terms (listing_id,term) VALUES ${dTplaceholders}`;
+          await connection.execute(dTquery, dTvalues);
+      }
+    
+      await connection.commit();
+      return rows;
+  } catch (err) {
+      await connection.rollback();
       throw err;
-    } finally {
+  }finally{
       connection.release();
-    }
+  }
 }
+
+const modifyListing = async (listingId, newListing) => {
+  const connection = await pool.getConnection();
+  try {
+    const SET_CLAUSES = Object.keys(newListing)
+      .map(key => `${key} = ?`)
+      .join(', ');
+      const query = `
+          UPDATE listing
+          SET ${SET_CLAUSES}
+          WHERE listing_id = ?;
+      `;
+      const values = [
+          ...Object.values(newListing),
+          listingId, 
+      ];
+      const [rows] = await connection.execute(query, values);
+      return rows;
+  } catch (err) {
+    throw err;
+  } finally {
+    connection.release();
+  }
+}
+
+const removeListing = async (listingId) =>{
+  const connection = await pool.getConnection();
+  try {
+      const [rows] = await connection.execute('DELETE FROM listing WHERE listing_id = ?;', [listingId]);
+      return rows;
+  } catch (err) {
+      throw err;
+  }finally{
+      connection.release();
+  }
+}
+
 const getListing = async (listingId) =>{
     const connection = await pool.getConnection();
     try {
-        const [rows] = await connection
-        .execute(`
-        SELECT * FROM listing WHERE listing.listing_id = ?;`,
-        [listingId]);
+        const [rows] = await connection.execute(
+          `SELECT listing.*,(SELECT JSON_ARRAYAGG(amenities.name) FROM amenities WHERE amenities.listing_id = listing.listing_id) AS amenities,(SELECT COUNT(*) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS review_count,(SELECT FLOOR(AVG(rating)) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS average_rating,(SELECT JSON_ARRAYAGG(describing_terms.term) FROM describing_terms WHERE describing_terms.listing_id = listing.listing_id) AS describing_terms,(SELECT JSON_ARRAYAGG(listing_photos.url) FROM listing_photos WHERE listing_photos.listing_id = listing.listing_id) AS photo_urls FROM listing WHERE listing.listing_id = ?;`,[listingId]);
         return rows[0];
     } catch (err) {
         throw err;
@@ -215,6 +251,7 @@ const getListing = async (listingId) =>{
         connection.release();
     }
 }
+
 const setAvailable = async (listingId) =>{
     const connection = await pool.getConnection();
     try {
@@ -227,6 +264,7 @@ const setAvailable = async (listingId) =>{
         connection.release();
     }
 }
+
 const setUnAvailable = async (listingId) =>{
     const connection = await pool.getConnection();
     try {
@@ -239,14 +277,52 @@ const setUnAvailable = async (listingId) =>{
         connection.release();
     }     
 }
+
+
+const addDescribingTerms = async (listing_id, describing_terms) => {
+  const connection = await pool.getConnection();
+  try {
+    const placeholders = describing_terms.map(() => '(?, ?)').join(',');
+    const values = []; 
+    
+    Object.values(describing_terms).map((v, i) => {
+        values.push(listing_id);
+        values.push(v);
+    });
+
+    const query = `INSERT INTO describing_terms (listing_id, term) VALUES ${placeholders}`;
+    const [rows] = await connection.execute(query, values);
+    return rows;
+  } catch (err) {
+    throw err;
+  }finally{
+      connection.release();
+  }
+};
+
+const removeDescribingTerms = async (listing_id) => {
+  const connection = await pool.getConnection();
+  try {
+    const [result] = await connection.execute(`DELETE FROM describing_terms WHERE listing_id = ?;`, [listing_id]);
+    return result;
+  } catch (err) {
+    throw err;
+  }finally{
+      connection.release();
+  }
+};
+
 const addAmenities = async (listing_id, amenities) => {
     const connection = await pool.getConnection();
     try {
       const placeholders = amenities.map(() => '(?, ?)').join(',');
-      const values = amenities.reduce((acc, amenity) => {
-        acc.push(listing_id, amenity.amenityName);
-        return acc;
-      }, []);
+      const values = []; 
+      
+      Object.values(amenities).map((v, i) => {
+          values.push(listing_id);
+          values.push(v);
+      });
+
       const query = `INSERT INTO amenities (listing_id, name) VALUES ${placeholders}`;
       const [rows] = await connection.execute(query, values);
       return rows;
@@ -270,12 +346,16 @@ const removeAmenities = async (listing_id) => {
 const addPhotos = async (listing_id, urls) => {
     const connection = await pool.getConnection();
     try {
+      
       const placeholders = urls.map(() => '(?, ?)').join(',');
-      const values = urls.reduce((acc, url) => {
-        acc.push(listing_id, url);
-        return acc;
-      }, []);
-      const query = `INSERT INTO listing_photos (listing_id, url) VALUES ${placeholders}`;
+      const values = []; 
+      
+      Object.values(urls).map((v, i) => {
+          values.push(listing_id);
+          values.push(v);
+      });
+
+      const query = `INSERT INTO listing_photos (listing_id,url) VALUES ${placeholders}`;
       const [rows] = await connection.execute(query, values);
       return rows;
     } catch (err) {
@@ -284,6 +364,7 @@ const addPhotos = async (listing_id, urls) => {
         connection.release();
     }
 };
+
 const removePhotos = async (listing_id) => {
     const connection = await pool.getConnection();
     try {
@@ -301,5 +382,6 @@ module.exports = {
     modifyListing,removeListing,setAvailable,
     setUnAvailable,reportListing,viewListing,
     addPhotos,removePhotos,addAmenities,
-    removeAmenities, getListingPage, getListingCount
+    removeAmenities, getListingPage, getListingCount,
+    addDescribingTerms, removeDescribingTerms
 }

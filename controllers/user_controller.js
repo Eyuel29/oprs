@@ -3,8 +3,9 @@ const sendErrorResponse = require("../utils/sendErrorResponse");
 const ACCOUNT_STATUS = require("../config/verify_status");
 
 const removeUser = async (req, res) => {
-  try {
+    try {
     const userId = req?.params?.id;
+
     if (!userId) {
       return sendErrorResponse(res, 400, "Incomplete information!");
     }
@@ -21,17 +22,14 @@ const removeUser = async (req, res) => {
   }
 };
 
-const getPageUser = async (req, res) => {
+const getAllUsers = async (req, res) => {
   try {
     const page = req?.params?.page;
-    if (!page) {
-      return sendErrorResponse(res, 400, "Incomplete information!");
-    }
+    if (!page) return sendErrorResponse(res, 400, "Incomplete information!");
 
-    const result = await userData.getPageUser(page);
-    if (!result) {
-      return sendErrorResponse(res,404,"Not found, unable to show users!");
-    }
+    const result = await userData.getAllUsers(page);
+    if (!result) return sendErrorResponse(res,404,"Not found, unable to show users!");
+
     return res.status(200).json({
         success: true,
         message: `successfully loaded page ${page} users!`,
@@ -47,9 +45,7 @@ const getUser = async (req, res) => {
     const userId = req?.params?.id;
     const userRole = req.userRole;
 
-    if (!userId) {
-      return sendErrorResponse(res, 400, "Incomplete information!");
-    }
+    if (!userId) return sendErrorResponse(res, 400, "Incomplete information!");
 
     const result = userRole === 3000 ? await userData.getUser(userId) : 
     await userData.getUserInfo(userId);
@@ -144,7 +140,7 @@ const getContactInformation = async (req, res) => {
 };
 
 module.exports = {
-  getPageUser,
+  getAllUsers,
   getUser,
   suspendUser,
   removeUser,

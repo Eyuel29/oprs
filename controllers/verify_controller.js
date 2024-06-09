@@ -37,7 +37,6 @@ const verify_post = async (req, res)  => {
             return sendErrorResponse (res, 500, 'Internal error try again!');  
         }
     } catch (error) {
-        console.log(error);
         return sendErrorResponse(res, 500, 'Internal error please try agin later.');
     }
 }
@@ -45,11 +44,7 @@ const verify_post = async (req, res)  => {
 const verify_get = async (req, res)  => {
     try {
         const userId = req?.userId;
-        console.log(userId);
-        if (!userId) {
-            return sendErrorResponse(res, 401, 'Unauthorized');
-        }
-        
+        if (!userId) return sendErrorResponse(res, 401, 'Unauthorized');
         const userData = await getUser(userId);
         const {email} = userData;
 
@@ -69,7 +64,6 @@ const verify_get = async (req, res)  => {
         });
 
     } catch (error) {
-        console.log(error);
         return sendErrorResponse(res, 500, 'Internal server error!');
     }
 

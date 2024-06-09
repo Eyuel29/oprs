@@ -10,6 +10,7 @@ const credentials = require('./middlewares/credentials');
 const {verifyUserSession} = require('./middlewares/verify_user_session');
 const verifyActive = require('./middlewares/verify_active');
 
+
 const auth = require('./routes/auth');
 const listing = require('./routes/listing');
 const user = require('./routes/user');
@@ -23,7 +24,7 @@ const PORT = process.env.PORT || 4000;
 
 
 app.use(logger);
-app.use(credentials);
+// app.use(credentials);
 // app.use(cors(corsOptions));
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
@@ -34,7 +35,6 @@ app.get('/', (req, res) =>{
     res.status(200).send("GOD DID!")
 });
 
-app.use('/',root);
 app.use('/auth', auth);
 app.use('/listing', verifyUserSession, verifyActive, listing);
 app.use('/user', verifyUserSession, verifyActive, user);

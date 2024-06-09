@@ -8,5 +8,6 @@ router.get('/user/:id',verifyUserSession, verifyRoles(ROLES_LIST.LANDLORD, ROLES
 router.get('/listing/:id',verifyUserSession, verifyRoles(ROLES_LIST.LANDLORD, ROLES_LIST.TENANT),reviewController.getListingReviews);
 router.delete('/delete/:id',verifyUserSession, verifyRoles(ROLES_LIST.LANDLORD, ROLES_LIST.TENANT),reviewController.deleteReview);
 router.post('/create',verifyUserSession, verifyRoles(ROLES_LIST.LANDLORD, ROLES_LIST.TENANT),reviewController.createReview);
+router.get('/myreviews',verifyUserSession, verifyRoles(ROLES_LIST.LANDLORD, ROLES_LIST.TENANT),reviewController.getMyReviews);
 
 module.exports = router;

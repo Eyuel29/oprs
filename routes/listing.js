@@ -10,7 +10,7 @@ router.put('/modify/:id', verifyUserSession,verifyRoles(ROLES_LIST.LANDLORD), li
 router.put('/setAvailable/:id', verifyUserSession,verifyRoles(ROLES_LIST.LANDLORD), listingController.setAvaliable);
 router.put('/setUnAvailable/:id', verifyUserSession,verifyRoles(ROLES_LIST.LANDLORD), listingController.setUnAvaliable);
 router.get('/page/:page',verifyUserSession,listingController.getPageListing );
-router.get('/owner/:id',verifyUserSession,verifyRoles(ROLES_LIST.LANDLORD), listingController.getOwnerListing );
-router.get('/get/:id',verifyUserSession,verifyRoles(ROLES_LIST.LANDLORD), listingController.getListing);
+router.get('/owner',verifyUserSession,verifyRoles(ROLES_LIST.LANDLORD), listingController.getOwnerListing );
+router.get('/get/:id',verifyUserSession,listingController.getListing);
 
 module.exports = router;

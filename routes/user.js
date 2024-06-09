@@ -5,7 +5,7 @@ const verifyRoles = require('../middlewares/verify_roles');
 const { verifyUserSession } = require('../middlewares/verify_user_session');
 
 router.delete('/remove/:id', verifyUserSession,verifyRoles(ROLES_LIST.ADMIN),userController.removeUser);
-router.get('/page/:page',verifyUserSession,verifyRoles(ROLES_LIST.ADMIN),userController.getPageUser );
+router.get('/page/:page',verifyUserSession,verifyRoles(ROLES_LIST.ADMIN),userController.getAllUsers );
 router.get('/get/:id', verifyUserSession,userController.getUser);
 router.get('/contact/:id', verifyUserSession, userController.getContactInformation );
 router.put('/suspend/:id',verifyUserSession,verifyRoles(ROLES_LIST.ADMIN),userController.suspendUser );

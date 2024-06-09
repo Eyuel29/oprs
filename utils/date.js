@@ -1,3 +1,9 @@
+const toTimestamp = (dateString) =>{
+    const date = new Date(dateString);
+    const timestampSeconds = Math.floor(date.getTime());
+    return timestampSeconds;
+}
+
 const getDate = () =>{
     let currentDate = new Date();
     let year = currentDate.getFullYear();
@@ -12,4 +18,4 @@ const getDate = () =>{
     return formattedDateTime;    
 }
 
-module.exports = getDate;
+module.exports = {getDate, toTimestamp};

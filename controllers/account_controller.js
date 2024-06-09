@@ -2,12 +2,12 @@ const userData = require('../dataAccessModule/user_data');
 const sessionData = require('../dataAccessModule/session_data');
 const { createVerificationKey } = require('../dataAccessModule/verification_data');
 const { handleFileUpload, uploadPhoto } = require('../dataAccessModule/upload_data');
-const { getUserByEmail } = require('../dataAccessModule/user_data');
+const { getUserByEmail, getUser } = require('../dataAccessModule/user_data');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const sendErrorResponse = require('../utils/sendErrorResponse');
 const sendCodeToEmail = require('../utils/emailer');
-const getDate = require('../utils/date');
+const {getDate} = require('../utils/date');
 
 const signout = async (req, res) => {
     
@@ -34,21 +34,16 @@ const signout = async (req, res) => {
 const signin = async (req, res) => {
     try {
         const { email, password } = req.body;
-        if (!email || !password){
-            return sendErrorResponse(res, 400, "Please provide email and password!");
-        }
-    
-        const foundUser = await getUserByEmail(email);
-        if (!foundUser) {
-            return sendErrorResponse(res, 400, "User not found!");
-        }
-    
-        const match = await bcrypt.compare(password, foundUser.auth_string);
-        if (!match) {
-            return sendErrorResponse(res, 400, 'Password is invalid!');
-        }
+        if (!email || !password) return sendErrorResponse(res, 400, "Please provide email and password!");
 
-        const sessionId = crypto.randomUUID();
+        const foundUser = await getUserByEmail(email);
+        if (!foundUser  || !foundUser.user_role) return sendErrorResponse(res, 400, "User not found!");
+
+        const match = await bcrypt.compare(password, foundUser.auth_string);
+
+        if (!match) return sendErrorResponse(res, 400, 'Password is invalid!');
+
+        const sessionId = crypto.randomBytes(64).toString('hex');
         const userId = foundUser?.user_id;
         const userRole = foundUser?.user_role;
         const userAgent = req.headers['user-agent'];
@@ -56,17 +51,16 @@ const signin = async (req, res) => {
         const createdAt = "" + new Date().getTime();
         const dayMillSec = 1000 * 60 * 60 * 24;
         const expiresAt = "" + (new Date().getTime() + dayMillSec);
-        
+
         const result = await sessionData.createUserSession(sessionId,userId,userRole,userAgent,origin,createdAt,expiresAt);
-        if (result.affectedRows < 1) {
-            return sendErrorResponse(res, 409, 'Something went wrong!');
-        }
 
-        if (req?.cookies?.session_id) {
-            await handleExsistingSession(req?.cookies?.session_id);
-        }
+        if (result.affectedRows < 1) return sendErrorResponse(res, 409, 'Something went wrong!');
 
+        if (req?.cookies?.session_id) await handleExsistingSession(req?.cookies?.session_id);
+        
         res.cookie('session_id', sessionId, { httpOnly: true, secure: true, sameSite: 'None', maxAge: (24 * 60 * 60 * 1000) });
+
+
         res.status(200).json({
             success : true,
             message : 'Login success',
@@ -89,8 +83,7 @@ const handleExsistingSession  = async (sessionId) =>{
 const register = async (req, res) => {
     try{
         handleFileUpload(req, res, async (err) => {
-            if (
-                !req?.body?.full_name ||
+            if (!req?.body?.full_name ||
                 !req?.body?.gender ||
                 !req?.body?.phone_number ||
                 !req?.body?.email ||
@@ -101,87 +94,78 @@ const register = async (req, res) => {
                 !req?.body?.user_role ||
                 !req?.body?.region ||
                 !req?.body?.password ) {
-                return sendErrorResponse(res, 400, 'Please provide the required information!');             
+                    return sendErrorResponse(res, 400, 'Please provide the required information!');             
             }
 
-            const { full_name,gender,
-                phone_number,email,zone,
-                woreda,job_type,age,
-                region,password,user_role
-            } = req?.body;
-
+            const { full_name,gender,phone_number,email,zone,woreda,job_type,age,region,password,user_role } = req?.body;
+            const socials = Array.from(req?.body?.socials);
             const married = req?.body?.married ? 1 : 0;
             const account_status = 1000;
-            const user_id = crypto.randomUUID();
             const date_joined = getDate();
-            const users = await userData.getUserByEmail(email);
 
-            if (users) {
-                return sendErrorResponse(res, 409, 'User already exists with this email!');
-            }
-    
+            const foundUser = await getUserByEmail(email);
+            if (foundUser) return sendErrorResponse(res, 409, 'User already exists with this email!');
+	    
             var uploaded_file;
+            if(err) return sendErrorResponse(res, 400, "File too large!");
 
-            if(err){
-                return sendErrorResponse(res, 400, "File too large!");
-            }
-
-            if (req?.file) {
+            if (req?.files.length > 0) {
                 try{
-                    uploaded_file = await uploadPhoto(req?.file);
+                    uploaded_file = await uploadPhoto(req?.files[0]);
                 } catch (error) {
-                    console.log(error);
+                    console.log(error)
                     return sendErrorResponse(res, 500, "Internal server error! Couldn't upload the file!");    
                 }   
 
-                if (!uploaded_file) {
-                    return sendErrorResponse(res, 500, "Internal server error! Couldn't upload the file!");    
-                }
+                if (!uploaded_file) return sendErrorResponse(res, 500, "Internal server error! Couldn't upload the file!");
             }
 
-            const userRegRes = await userData.createUser(
-                { user_id,full_name,gender,phone_number,email,
+            const userRegRes = await userData.createUser({ 
+                full_name,gender,phone_number,email,
                 date_joined,zone,woreda,job_type,uploaded_file,
-                age,account_status,region,married }
-            );
+                age,account_status,region,married 
+            });
 
-            if (req?.socials && req?.socials.length > 0) {
-                await userData.addSocials(user_id, req?.socials);
-            }
+            if (userRegRes.affectedRows < 1) return sendErrorResponse(res, 500, 'Something went wrong!');
+            
+	    const new_user_id = userRegRes.insertId;
 
+            if (socials && socials.length > 0) await userData.addSocials(new_user_id, req?.socials);
+            
             bcrypt.hash(password, 8, async (err, hash) => {
                 const auth_string = hash;
-                const userAuthRes = await userData.createUserAuth(user_id, auth_string, user_role);
+                const userAuthRes = await userData.createUserAuth(new_user_id, auth_string, user_role);
                 if(userRegRes.affectedRows < 1 || userAuthRes.affectedRows < 1){
                     return sendErrorResponse(res, 500, 'Registration failed try agin later!');
                 }
             });
 
-            const sessionId = crypto.randomUUID();
-            const userId = user_id;
+            const sessionId = crypto.randomBytes(64).toString('hex');
             const userRole = user_role;
+
             const userAgent = req.headers['user-agent'];
             const origin = req.headers.origin || "UNDEFINED";
             const createdAt = "" + new Date().getTime();
             const dayMillSec = 1000 * 60 * 60 * 24;
             const expiresAt = "" + (new Date().getTime() + dayMillSec);
-            const sessionResult = await sessionData.createUserSession(sessionId,userId,userRole,userAgent,origin,createdAt,expiresAt);
+            const sessionResult = await sessionData.createUserSession(sessionId,new_user_id,userRole,userAgent,origin,createdAt,expiresAt);
             
-            if (sessionResult.affectedRows < 1) {return sendErrorResponse(res, 409, 'Something went wrong!');}
+            if (sessionResult.affectedRows < 1) return sendErrorResponse(res, 409, 'Something went wrong!');
 
-            if (req?.cookies?.session_id) {await handleExsistingSession(req?.cookies?.session_id);}
+            if (req?.cookies?.session_id) await handleExsistingSession(req?.cookies?.session_id);
 
             res.cookie('session_id', sessionId, { httpOnly: true, secure: true, sameSite: 'None', maxAge: (24 * 60 * 60 * 1000) });
 
-            const randomCode  = crypto.randomInt(999999);
+            const randomCode = crypto.randomInt(999999);
 
             await sendVerificationCode(res, email, randomCode);
 
             await createVerificationKey(
-                user_id,
+                new_user_id,
                 randomCode,
                 ""+new Date().getTime(),
                 ""+(new Date().getTime() + 60000 * 5));
+
             return res.status(200).json({
                 success : true,
                 message : 'Please verify your email!',
@@ -197,9 +181,9 @@ const register = async (req, res) => {
 const sendVerificationCode = async (res, email, randomCode) =>{
     try {
         sendCodeToEmail(email,randomCode, () =>{
+
         });
     } catch (error) {
-        console.log(error);
         return sendErrorResponse (res, 400, 'Your email is invalid!');
     }
 }

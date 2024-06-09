@@ -1,7 +1,7 @@
 require('dotenv').config();
 const pool = require('../config/db');
 
-const createUserSession = async ( session_id,user_id,user_role,user_agent,origin,created_at,expires_at) =>{
+const createUserSession = async (session_id,user_id,user_role,user_agent,origin,created_at,expires_at) =>{
     const connection = await pool.getConnection();
     try {
         const [rows] = await connection.execute('INSERT INTO sessions(session_id,user_id,user_role,user_agent,user_ip,created_at,expires_at)VALUES(?,?,?,?,?,?,?);', [ session_id,user_id,user_role,user_agent,origin,created_at,expires_at]);
@@ -46,7 +46,6 @@ const deleteUserSession = async ( session_id) =>{
         throw err;
     }
 }
-
 
 module.exports = {
     deleteUserSession,

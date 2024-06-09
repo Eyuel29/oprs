@@ -2,3 +2,4 @@ node_modules
 config/oprs-3b110-firebase-adminsdk-ipqtk-fc26c4fa81.json
 .env
 logs
+.vercel
