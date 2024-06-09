@@ -39,6 +39,8 @@ const signin = async (req, res) => {
         const foundUser = await getUserByEmail(email);
         if (!foundUser  || !foundUser.user_role) return sendErrorResponse(res, 400, "User not found!");
 
+        
+
         const match = await bcrypt.compare(password, foundUser.auth_string);
 
         if (!match) return sendErrorResponse(res, 400, 'Password is invalid!');
