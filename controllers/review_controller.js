@@ -29,6 +29,8 @@ const getUserReviews = async (req, res) => {
             return sendErrorResponse(res,400,"Incomplete information!");
         }
         const user_id = req?.params?.id;
+
+
         const reviewResult = await reviewData.getUserReviews(user_id);
         return res.status(200).json({
             success: true,
@@ -45,6 +47,7 @@ const getMyReviews = async (req, res) => {
         if( !req?.userId ) return sendErrorResponse(res,400,"Incomplete information!");
         const user_id = req?.userId;
         const reviewResult = await reviewData.getUserReviews(user_id);
+
         return res.status(200).json({
             success: true,
             message: "Successfully loaded Reviews!",
@@ -60,6 +63,7 @@ const getListingReviews = async (req, res) => {
         if( !req?.params?.id ) return sendErrorResponse(res,400,"Incomplete information!");
         const listing_id = req?.params?.id;
         const reviewResult = await reviewData.getListingReviews(listing_id);
+
         return res.status(200).json({
             success: true,
             message: "Successfully loaded Reviews!",
@@ -73,26 +77,25 @@ const getListingReviews = async (req, res) => {
 
 const createReview = async (req, res) =>{
     try {
+
         if( !req?.body?.review_message ||
             !req?.body?.rating ||
             !req?.body?.receiver_id ||
             !req?.body?.author_name
-         ){
-            return sendErrorResponse(res,400,"Incomplete information!");
-        }
+         ) return sendErrorResponse(res,400,"Incomplete information!");
 
         const author_id = req?.userId;
-        const {review_message,rating,author_name,receiver_id} = req?.body;
+        const {review_message,rating,reviewed_listing_id,author_name,receiver_id} = req?.body;
 
         const userToReview = await getUser(receiver_id);
         if(userToReview.user_id == author_id) return sendErrorResponse(res, 403, "you can not review your account!");
 
-        const review_date = getDate();
         const reviewResult = await reviewData.createReview({
-            author_id,review_date,review_message,rating,author_name,receiver_id
+            author_id,review_message,rating,author_name,receiver_id,reviewed_listing_id
         });
 
         if (reviewResult.affectedRows < 1) return sendErrorResponse(res, 409, "Something went wrong!");
+        
         return res.status(200).json({
             success: true,
             message: "Review successfully sent!"

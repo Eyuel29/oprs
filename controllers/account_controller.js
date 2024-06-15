@@ -1,13 +1,13 @@
 const userData = require('../dataAccessModule/user_data');
 const sessionData = require('../dataAccessModule/session_data');
+const agreementData = require('../dataAccessModule/agreement_data');
 const { createVerificationKey } = require('../dataAccessModule/verification_data');
 const { handleFileUpload, uploadPhoto } = require('../dataAccessModule/upload_data');
-const { getUserByEmail, getUser } = require('../dataAccessModule/user_data');
+const { getUserByEmail } = require('../dataAccessModule/user_data');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const sendErrorResponse = require('../utils/sendErrorResponse');
 const sendCodeToEmail = require('../utils/emailer');
-const {getDate} = require('../utils/date');
 
 const signout = async (req, res) => {
     
@@ -15,6 +15,8 @@ const signout = async (req, res) => {
     if (!cookies?.session_id && !req?.userId) return res.sendStatus(204); //No content
     
     const cookieSessionId = cookies.session_id;
+
+    console.log("shit");
 
     const result = await sessionData.deleteUserSession(cookieSessionId);
 
@@ -37,14 +39,11 @@ const signin = async (req, res) => {
         if (!email || !password) return sendErrorResponse(res, 400, "Please provide email and password!");
 
         const foundUser = await getUserByEmail(email);
+        console.log(foundUser);
         if (!foundUser  || !foundUser.user_role) return sendErrorResponse(res, 400, "User not found!");
-
-        
-
         const match = await bcrypt.compare(password, foundUser.auth_string);
 
         if (!match) return sendErrorResponse(res, 400, 'Password is invalid!');
-
         const sessionId = crypto.randomBytes(64).toString('hex');
         const userId = foundUser?.user_id;
         const userRole = foundUser?.user_role;
@@ -55,11 +54,8 @@ const signin = async (req, res) => {
         const expiresAt = "" + (new Date().getTime() + dayMillSec);
 
         const result = await sessionData.createUserSession(sessionId,userId,userRole,userAgent,origin,createdAt,expiresAt);
-
         if (result.affectedRows < 1) return sendErrorResponse(res, 409, 'Something went wrong!');
-
         if (req?.cookies?.session_id) await handleExsistingSession(req?.cookies?.session_id);
-        
         res.cookie('session_id', sessionId, { httpOnly: true, secure: true, sameSite: 'None', maxAge: (24 * 60 * 60 * 1000) });
 
 
@@ -99,41 +95,39 @@ const register = async (req, res) => {
                     return sendErrorResponse(res, 400, 'Please provide the required information!');             
             }
 
-            const { full_name,gender,phone_number,email,zone,woreda,job_type,age,region,password,user_role } = req?.body;
+            const { full_name,gender,phone_number,email,zone,woreda,job_type,age,region,password,
+                user_role } = req?.body;
+
             const socials = Array.from(req?.body?.socials);
             const married = req?.body?.married ? 1 : 0;
             const account_status = 1000;
-            const date_joined = getDate();
 
             const foundUser = await getUserByEmail(email);
             if (foundUser) return sendErrorResponse(res, 409, 'User already exists with this email!');
 	    
             var uploaded_file;
-            if(err) return sendErrorResponse(res, 400, "File too large!");
+            if(err) return sendErrorResponse(res, 400, "Photos Only jpeg | png type & upto 1 MB is allowed!");
 
             if (req?.files.length > 0) {
                 try{
                     uploaded_file = await uploadPhoto(req?.files[0]);
                 } catch (error) {
-                    console.log(error)
                     return sendErrorResponse(res, 500, "Internal server error! Couldn't upload the file!");    
                 }   
-
                 if (!uploaded_file) return sendErrorResponse(res, 500, "Internal server error! Couldn't upload the file!");
             }
 
+
+
             const userRegRes = await userData.createUser({ 
-                full_name,gender,phone_number,email,
-                date_joined,zone,woreda,job_type,uploaded_file,
-                age,account_status,region,married 
-            });
+                full_name,gender,phone_number,email,zone,user_role,
+                woreda,job_type,uploaded_file,age,account_status,
+                region,married 
+            }, socials, uploaded_file);
 
             if (userRegRes.affectedRows < 1) return sendErrorResponse(res, 500, 'Something went wrong!');
-            
-	    const new_user_id = userRegRes.insertId;
-
+	        const new_user_id = userRegRes.insertId;
             if (socials && socials.length > 0) await userData.addSocials(new_user_id, req?.socials);
-            
             bcrypt.hash(password, 8, async (err, hash) => {
                 const auth_string = hash;
                 const userAuthRes = await userData.createUserAuth(new_user_id, auth_string, user_role);
@@ -190,8 +184,44 @@ const sendVerificationCode = async (res, email, randomCode) =>{
     }
 }
 
+const getUserAgreements = async (req, res) =>{
+    try {
+        const user_id = req.params.id;
+        if(!user_id) return sendErrorResponse(res, 400, "Incomplete information!");
+        const agreements = await agreementData.getAgreements();
+        return res.status(200).json({
+            "success" : true,
+            "message": "Loading user's agreements!",
+            body : agreements
+        });
+    } catch (error) {
+        return sendErrorResponse(res, 500, "Internal server error!");
+    }
+}
+
+const getMyAgreements = async (req, res) =>{
+    try {
+        const user_id = req.userId;
+        if(!user_id) return sendErrorResponse(res, 400, "Incomplete information!");
+
+        const agreements = await agreementData.getAgreements(user_id);
+
+        console.log(agreements);
+
+        return res.status(200).json({
+            "success" : true,
+            "message": "Loading user's agreements!",
+            body : agreements
+        });
+    } catch (error) {
+        return sendErrorResponse(res, 500, "Internal server error!");
+    }
+}
+
 module.exports = {
     signin,
     signout,
-    register
+    register,
+    getUserAgreements,
+    getMyAgreements
 }

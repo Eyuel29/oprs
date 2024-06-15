@@ -12,7 +12,7 @@ const createUserSession = async (session_id,user_id,user_role,user_agent,origin,
     }
 }
 
-const getUserSession = async ( session_id) =>{
+const getUserSession = async (session_id) =>{
     const connection = await pool.getConnection();
     try {
         const [rows] = await connection.execute('SELECT * FROM sessions WHERE session_id = ?;', [ session_id]);

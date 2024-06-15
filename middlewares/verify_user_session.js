@@ -2,12 +2,11 @@ const { getUserSession, deleteUserSession } = require('../dataAccessModule/sessi
 const sendErrorResponse = require('../utils/sendErrorResponse');
 
 const verifyUserSession = async (req, res, next) => {
+    
     try {
         const cookies = req?.cookies;
-        if (!cookies?.session_id){
-            return sendErrorResponse(res, 401, "Unauthorized");
-        }
-
+        if (!cookies?.session_id) return sendErrorResponse(res, 401, "Unauthorized");
+        
         const cookieSessionId = cookies.session_id;
         const userSession = await getUserSession(cookieSessionId);
         const foundUserSession = userSession[0];
@@ -29,6 +28,7 @@ const verifyUserSession = async (req, res, next) => {
 
         req.userId = foundUserSession.user_id;
         req.userRole = foundUserSession.user_role;
+        
         next();
 
     } catch (error) {

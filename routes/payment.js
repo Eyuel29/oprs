@@ -4,11 +4,11 @@ const ROLES_LIST = require('../config/ROLES');
 const paymentController = require('../controllers/payment_controller');
 const { verifyUserSession } = require('../middlewares/verify_user_session');
 
-router.get('/getSubAccount/:id', verifyUserSession,verifyRoles(ROLES_LIST.TENANT,ROLES_LIST.LANDLORD),paymentController.getPaymentInfo);
-router.post('/createSubAccount', verifyUserSession,verifyRoles(ROLES_LIST.LANDLORD),paymentController.createSubAccount);
-router.post('/deleteSubAccount', verifyUserSession,verifyRoles(ROLES_LIST.LANDLORD),paymentController.deleteSubAccount);
-
-router.post('/initialize', verifyUserSession,verifyRoles(ROLES_LIST.TENANT, ROLES_LIST.LANDLORD),paymentController.initialize);
-router.post('/verify', verifyUserSession,verifyRoles(ROLES_LIST.TENANT),paymentController.verifyPayment);
+router.get('/getSubAccount/:id',verifyUserSession,verifyRoles(ROLES_LIST.TENANT,ROLES_LIST.LANDLORD),paymentController.getPaymentInfo);
+router.get('/myInfo',verifyUserSession,verifyRoles(ROLES_LIST.LANDLORD),paymentController.getMyPaymentInfo);
+router.post('/createSubAccount',verifyUserSession,verifyRoles(ROLES_LIST.LANDLORD),paymentController.createSubAccount);
+router.delete('/deleteSubAccount',verifyUserSession,verifyRoles(ROLES_LIST.LANDLORD),paymentController.deleteSubAccount);
+router.post('/initialize', verifyUserSession,verifyRoles(ROLES_LIST.TENANT),paymentController.initialize);
+router.get('/verify', verifyUserSession,verifyRoles(ROLES_LIST.TENANT),paymentController.verifyPayment);
 
 module.exports = router;

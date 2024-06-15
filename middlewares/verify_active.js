@@ -9,7 +9,6 @@ const verifyActive = async (req, res, next) => {
         const result = await getUserStatus(userId);
 
         if (!result[0]) return sendErrorResponse(res, 500, "Internal server error!");
-        console.log(result[0]);
         switch (result[0].account_status) {
             case 1000:
                 return sendErrorResponse(res, 403, "Please verify your acccount!");
@@ -23,6 +22,7 @@ const verifyActive = async (req, res, next) => {
                 break;
         }
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res, 500, "Internal server error!");
     }
 }

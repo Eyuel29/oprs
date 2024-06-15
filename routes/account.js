@@ -6,6 +6,8 @@ const verifyActive = require('../middlewares/verify_active');
 
 router.get('/signout', verifyUserSession,accountController.signout);
 router.post('/verify/:key', verifyUserSession,verifyController.verify_post);
+router.get('/agreement/:id', verifyUserSession,accountController.getUserAgreements);
+router.get('/myAgreement', verifyUserSession,accountController.getMyAgreements);
 router.get('/verify', verifyUserSession,verifyController.verify_get);
 
 module.exports = router;

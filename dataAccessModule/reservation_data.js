@@ -5,10 +5,10 @@ const createRequest = async (reservation) =>{
 const connection = await pool.getConnection();
    connection.beginTransaction();
   try {
-      const {tenant_id,owner_id,tenant_name,listing_id,selected_payment_method,date,price_offer, stay_dates}  = reservation;
+      const {tenant_id,owner_id,additional_message,listing_id,selected_payment_method,price_offer, stay_dates}  = reservation;
         const [result] = await connection.
-        execute(`INSERT INTO reservation(tenant_id,owner_id,tenant_name,listing_id,selected_payment_method,date,price_offer) 
-        VALUES(?,?,?,?,?,?,?);`,[tenant_id,owner_id,tenant_name,listing_id,selected_payment_method,date,price_offer]);
+        execute(`INSERT INTO reservation(tenant_id,owner_id,additional_message,listing_id,selected_payment_method,price_offer) 
+        VALUES(?,?,?,?,?,?);`,[tenant_id,owner_id,additional_message,listing_id,selected_payment_method,price_offer]);
 
         const placeholders = stay_dates.map(() => '(?, ?)').join(',');
         const values = []; 
@@ -18,7 +18,6 @@ const connection = await pool.getConnection();
         });
         const query = `INSERT INTO stay_dates (reservation_id,stay_date) VALUES ${placeholders}`;
         await connection.execute(query, values);
-        
 
         connection.commit();
         return result;
@@ -30,50 +29,98 @@ const connection = await pool.getConnection();
     }
 }
 
-const getReservations = async (owner_id) =>{
+const getReservations = async (owner_id) => {
     const connection = await pool.getConnection();
     try {
         const [rows] = await connection.execute(
             `SELECT 
                 reservation.*,
-                (SELECT JSON_ARRAYAGG(stay_dates.stay_date) 
+                listing.title as listing_title,
+                listing.description as description,
+                listing.lease_duration_days as lease_duration_days,
+                JSON_OBJECT(
+                    "user_id", user.user_id,
+                    "full_name", user.full_name,
+                    "gender", user.gender,
+                    "phone_number", user.phone_number,
+                    "age", user.age,
+                    "email", user.email,
+                    "zone", user.zone,
+                    "woreda", user.woreda,
+                    "date_joined", user.date_joined,
+                    "account_status", user.account_status,
+                    "region", user.region,
+                    "job_type", user.job_type,
+                    "married", user.married
+                ) AS tenant,
+                (SELECT JSON_ARRAYAGG(stay_dates.stay_date)
                  FROM stay_dates 
                  WHERE stay_dates.reservation_id = reservation.reservation_id) AS stay_dates 
-            FROM reservation WHERE owner_id = ? AND status = 2000;`,
-             [owner_id]);
+            FROM reservation 
+            LEFT JOIN user ON user.user_id = reservation.tenant_id 
+            LEFT JOIN listing ON reservation.listing_id = listing.listing_id 
+            WHERE reservation.owner_id = ? AND reservation.status = 2000;`,
+            [owner_id]
+        );
         return rows;
     } catch (err) {
         throw err;
-    }finally{
+    } finally {
         connection.release();
     }
 }
 
-const getReservation = async (owner_id, reservation_id) =>{
+
+const getReservation = async (owner_id, reservation_id) => {
     const connection = await pool.getConnection();
     try {
-        const [rows] = await connection.execute(`SELECT 
+        const [rows] = await connection.execute(
+            `SELECT 
                 reservation.*,
-                (SELECT JSON_ARRAYAGG(stay_dates.stay_date) 
+                listing.title as listing_title,
+                listing.description as description,
+                listing.lease_duration_days as lease_duration_days,
+                JSON_OBJECT(
+                    "user_id", user.user_id,
+                    "full_name", user.full_name,
+                    "gender", user.gender,
+                    "phone_number", user.phone_number,
+                    "age", user.age,
+                    "email", user.email,
+                    "zone", user.zone,
+                    "woreda", user.woreda,
+                    "date_joined", user.date_joined,
+                    "account_status", user.account_status,
+                    "region", user.region,
+                    "job_type", user.job_type,
+                    "married", user.married
+                ) AS tenant,
+                (SELECT JSON_ARRAYAGG(stay_dates.stay_date)
                  FROM stay_dates 
                  WHERE stay_dates.reservation_id = reservation.reservation_id) AS stay_dates 
-            FROM reservation WHERE owner_id = ? AND reservation_id = ?;`, [owner_id, reservation_id]);
+            FROM reservation 
+            LEFT JOIN user ON user.user_id = reservation.tenant_id 
+            LEFT JOIN listing ON reservation.listing_id = listing.listing_id 
+            WHERE reservation.owner_id = ? AND reservation.reservation_id = ?;`,
+            [owner_id, reservation_id]
+        );
         return rows[0];
     } catch (err) {
         throw err;
-    }finally{
+    } finally {
         connection.release();
     }
 }
+
 
 const getRequest = async (tenant_id, reservation_id) =>{
     const connection = await pool.getConnection();
     try {
         const [rows] = await connection.execute(`SELECT 
-                reservation.*,
-                (SELECT JSON_ARRAYAGG(stay_dates.stay_date) 
-                 FROM stay_dates 
-                 WHERE stay_dates.reservation_id = reservation.reservation_id) AS stay_dates 
+            reservation.*,
+            (SELECT JSON_ARRAYAGG(stay_dates.stay_date) 
+                FROM stay_dates 
+                WHERE stay_dates.reservation_id = reservation.reservation_id) AS stay_dates 
             FROM reservation WHERE tenant_id = ? AND reservation_id = ?;`, [tenant_id, reservation_id]);
         return rows[0];
     } catch (err) {

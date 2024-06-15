@@ -46,9 +46,7 @@ const getUser = async (req, res) => {
     const userRole = req.userRole;
 
     if (!userId) return sendErrorResponse(res, 400, "Incomplete information!");
-
-    const result = userRole === 3000 ? await userData.getUser(userId) : 
-    await userData.getUserInfo(userId);
+    const result = await userData.getUser(userId);
 
     if (result) {
       return res.status(200).json({
@@ -121,29 +119,10 @@ const activateUser = async (req, res) => {
   }
 };
 
-
-const getContactInformation = async (req, res) => {
-  try {
-    const userId = req?.params?.id;
-    if (!userId) {
-      return sendErrorResponse(res, 400, "Incomplete information!");
-    }
-    const result = await userData.getContactInfo(userId);
-    return res.status(200).json({
-        success: false,
-        message: `Loading contact information of the user!`,
-        body: result,
-    });
-  } catch (error) {
-    return sendErrorResponse(res, 500, "Internal server error!");
-  }
-};
-
 module.exports = {
   getAllUsers,
   getUser,
   suspendUser,
   removeUser,
-  getContactInformation,
   activateUser,
 };

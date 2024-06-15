@@ -11,25 +11,44 @@ const deleteSubAccount = async (req, res) =>{
         const userId = req?.userId;
         const deleteSubAccountResullt = await paymentData.deleteSubAccount(userId);
 
+        console.log(deleteSubAccountResullt);
+
         if (deleteSubAccountResullt.affectedRows < 1) return sendErrorResponse(
-            res,
-            500,
-            "Internal server error, Couldn't delete the sub-accunt!"
-        );
+            res,500,"Internal server error, Couldn't delete the sub-accunt!");
 
         res.status(200).json({ 
             "success" : true,
             "message" : "Your sub-account has been deleted!"
         });
-
     } catch (error) {
-        return sendErrorResponse(res, 500, "Internal server error!");
+        return sendErrorResponse(
+            res, 
+            500, 
+            "Internal server error!"
+        );
     }
 }
 
 const getPaymentInfo = async (req, res) =>{
     try {
         const owner_id = req?.params?.id;
+        if(!owner_id) return sendErrorResponse(res, 400, "Invalid information, no owner specified!");
+
+        const paymentInfo = await paymentData.getPaymentInfo(owner_id);
+        if(!paymentInfo) return sendErrorResponse(res,404,"The owner has no payment information specified!");
+        res.status(200).json({ 
+            "success" : true,
+            "body" : paymentInfo.sub_account_id,
+            "message" : "Successfully retrieved payment informtion!"
+        });
+    } catch (error) {
+        return sendErrorResponse(res, 500, "Internal server error!");
+    }
+}
+
+const getMyPaymentInfo = async (req, res) =>{
+    try {
+        const owner_id = req?.userId;
         if(!owner_id) return sendErrorResponse(res, 400, "Invalid information, no owner specified!");
 
         const paymentInfo = await paymentData.getPaymentInfo(owner_id);
@@ -40,11 +59,11 @@ const getPaymentInfo = async (req, res) =>{
             "body" : paymentInfo,
             "message" : "Successfully retrieved payment informtion!"
         });
-
     } catch (error) {
         return sendErrorResponse(res, 500, "Internal server error!");
     }
 }
+
 
 const createSubAccount = async (req, res) =>{
     try {
@@ -52,23 +71,22 @@ const createSubAccount = async (req, res) =>{
             !req?.body?.account_number ||
             !req?.body?.business_name ||
             !req?.body?.account_owner_name ||
-            !req?.body?.bank_id ||
-            !req?.body?.bank_name
-        ) {
-            return sendErrorResponse(res, 400, "Incomplete information!");
-        }
+            !req?.body?.bank_id || !req?.body?.bank_name
+        ) return sendErrorResponse(res, 400, "Incomplete information!");
+
+        if (!req?.userId) return sendErrorResponse(res, 400, "There is something wrong with the data you provided!");
 
         const {account_number, business_name, account_owner_name, bank_id, bank_name} = req?.body;
+        
         const response = await axios.post(
-            "https://api.chapa.co/v1/subaccount",
-            {
+            "https://api.chapa.co/v1/subaccount",{
                 business_name: business_name,
                 account_name: account_owner_name,
                 bank_code: bank_id,
                 account_number: account_number,
                 split_type: "percentage",
                 split_value: 0.02,
-            },{
+            },{ 
             headers : {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${CSK}`,
@@ -76,9 +94,9 @@ const createSubAccount = async (req, res) =>{
             },
         );
 
-        const sub_account_id = response.data.data["subaccounts[id]"];
+        consoe.log(response.data);
 
-        if (!req?.userId) return sendErrorResponse(res, 400, "There is something wrong with the data you provided!");
+        const sub_account_id = response.data.data["subaccounts[id]"];
 
         const result = await paymentData.createSubAccount(
             req?.userId, 
@@ -97,29 +115,27 @@ const createSubAccount = async (req, res) =>{
         });
 
     } catch (error) {
-        console.log(error);
+        console.log(error.response);
         return sendErrorResponse(res, 500, "Internal server error, Couldn't create the subaccount!");
     }
 }
 
 const initialize = async (req, res) =>{
   try{
-    if (!req?.userId) return sendErrorResponse(res, 400, "Payment initialization failed!");
-    const userId = req?.userId;
-
-    const paymentReceiverData = await paymentData.getPaymentInfo(ownerId);
-    if (!paymentReceiverData) return sendErrorResponse(
-        res,
-        500,
-        "Internal server error, Couldn't initialize the payment!"
-    );
-
+    
     if (!req?.body?.title ||
         !req?.body?.description ||
         !req?.body?.amount ||
-        !req?.body?.currency 
+        !req?.body?.currency ||
+        !req?.body?.receiver_id
     ) return sendErrorResponse(res, 400, "Incomplete information!");
 
+    if (!req?.userId) return sendErrorResponse(res, 400, "Payment initialization failed!");
+    const userId = req?.userId;
+
+    const paymentReceiverData = await paymentData.getPaymentInfo(req?.body?.receiver_id);
+
+    if (!paymentReceiverData) return sendErrorResponse(res,500,"Internal server error, Couldn't initialize the payment!");
     const {title,description,amount,currency} = req?.body;
 
     const payee = await getUser(userId);
@@ -158,7 +174,10 @@ const initialize = async (req, res) =>{
 
     res.status(200).json({ 
         "success" : true,
-        "body" : response.data.data,
+        "body" : {
+            "checkOutLink" : response.data.data,
+            "txRef" : txReference
+        },
         "message" : "Use this link for checkout!"
     });
 
@@ -173,6 +192,7 @@ const verifyPayment = async (req, res) =>{
         const tReference = req.param.tReference;
         if (!tReference) return sendErrorResponse(res, 400, "Couldn't verify the payment!");
         const response = await chapa.verify({tx_ref: tReference});
+
         const reference = {
             "first_name" : response.data.first_name ?? "",
             "last_name" : response.data.last_name ?? "",
@@ -189,10 +209,13 @@ const verifyPayment = async (req, res) =>{
             "created_at" : response.data.created_at ?? "",
             "updated_at" : response.data.updated_at ?? "",
         };
+
         const result = await paymentData.createPaymentReference(reference);
+
 
         if(result.affectedRows < 1){sendErrorResponse(res,500,"Internal server error");}
         res.status(200).json({
+            "success" : true,
             "message" : "Payment successful",
             "body" : null
         });
@@ -207,5 +230,6 @@ module.exports = {
     deleteSubAccount,
     verifyPayment,
     initialize,
-    getPaymentInfo
+    getPaymentInfo,
+    getMyPaymentInfo
 }

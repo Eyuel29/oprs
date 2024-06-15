@@ -10,7 +10,6 @@ const credentials = require('./middlewares/credentials');
 const {verifyUserSession} = require('./middlewares/verify_user_session');
 const verifyActive = require('./middlewares/verify_active');
 
-
 const auth = require('./routes/auth');
 const listing = require('./routes/listing');
 const user = require('./routes/user');
@@ -45,6 +44,6 @@ app.use('/account',  verifyUserSession, account);
 app.use('/notification',  verifyUserSession, verifyActive, notification);
 app.use(errorHandler);
 
-app.listen(PORT, () =>{ 
-    console.log("SERVER RUNNIG AT PORT : " + PORT); 
+app.listen(PORT, () => {
+    console.log("SERVER RUNNIG AT PORT : " + PORT)
 });
