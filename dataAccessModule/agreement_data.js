@@ -58,51 +58,51 @@ const getAgreements = async (user_id) =>{
     const connection = await pool.getConnection();
     try {
         const [rows] = await connection.execute(
-            `SELECT agreement.*,
-                JSON_OBJECT(
-                    "user_id", tenant_user.user_id,
-                    "full_name", tenant_user.full_name,
-                    "gender", tenant_user.gender,
-                    "phone_number", tenant_user.phone_number,
-                    "age", tenant_user.age,
-                    "email", tenant_user.email,
-                    "zone", tenant_user.zone,
-                    "woreda", tenant_user.woreda,
-                    "date_joined", tenant_user.date_joined,
-                    "account_status", tenant_user.account_status,
-                    "region", tenant_user.region,
-                    "job_type", tenant_user.job_type,
-                    "married", tenant_user.married,
-                    "url", tenant_photos.url
-                ) AS tenant,
-                listing.price_per_duration AS price_per_duration,
-                listing.payment_currency AS payment_currency,
-                payment_info.sub_account_id AS sub_account_id,
-                JSON_OBJECT(
-                    "user_id", owner_user.user_id,
-                    "full_name", owner_user.full_name,
-                    "gender", owner_user.gender,
-                    "phone_number", owner_user.phone_number,
-                    "age", owner_user.age,
-                    "email", owner_user.email,
-                    "zone", owner_user.zone,
-                    "woreda", owner_user.woreda,
-                    "date_joined", owner_user.date_joined,
-                    "account_status", owner_user.account_status,
-                    "region", owner_user.region,
-                    "job_type", owner_user.job_type,
-                    "married", owner_user.married,
-                    "url", owner_photos.url
-                ) AS owner
-             FROM agreement
-             LEFT JOIN user AS tenant_user ON agreement.tenant_id = tenant_user.user_id
-             LEFT JOIN user_photos AS tenant_photos ON tenant_user.user_id = tenant_photos.user_id
-             LEFT JOIN user AS owner_user ON agreement.owner_id = owner_user.user_id
-             LEFT JOIN user_photos AS owner_photos ON owner_user.user_id = owner_photos.user_id
-             LEFT JOIN listing ON listing.listing_id = agreement.listing_id
-             LEFT JOIN payment_info ON owner_user.user_id = payment_info.user_id
-             WHERE agreement.owner_id = ? OR agreement.tenant_id = ? GROUP BY agreement.agreement_id;`,
-            [user_id, user_id]
+            `SELECT 
+              agreement.*,
+              JSON_OBJECT(
+                  "user_id", tenant_user.user_id,
+                  "full_name", tenant_user.full_name,
+                  "gender", tenant_user.gender,
+                  "phone_number", tenant_user.phone_number,
+                  "age", tenant_user.age,
+                  "email", tenant_user.email,
+                  "zone", tenant_user.zone,
+                  "woreda", tenant_user.woreda,
+                  "date_joined", tenant_user.date_joined,
+                  "account_status", tenant_user.account_status,
+                  "region", tenant_user.region,
+                  "job_type", tenant_user.job_type,
+                  "married", tenant_user.married,
+                  "url", COALESCE(tenant_photos.url, '')
+              ) AS tenant,
+              listing.price_per_duration AS price_per_duration,
+              listing.payment_currency AS payment_currency,
+              payment_info.sub_account_id AS sub_account_id,
+              JSON_OBJECT(
+                  "user_id", owner_user.user_id,
+                  "full_name", owner_user.full_name,
+                  "gender", owner_user.gender,
+                  "phone_number", owner_user.phone_number,
+                  "age", owner_user.age,
+                  "email", owner_user.email,
+                  "zone", owner_user.zone,
+                  "woreda", owner_user.woreda,
+                  "date_joined", owner_user.date_joined,
+                  "account_status", owner_user.account_status,
+                  "region", owner_user.region,
+                  "job_type", owner_user.job_type,
+                  "married", owner_user.married,
+                  "url", COALESCE(owner_photos.url, '')
+              ) AS owner
+          FROM agreement
+          LEFT JOIN user AS tenant_user ON agreement.tenant_id = tenant_user.user_id
+          LEFT JOIN user_photos AS tenant_photos ON tenant_user.user_id = tenant_photos.user_id
+          LEFT JOIN user AS owner_user ON agreement.owner_id = owner_user.user_id
+          LEFT JOIN user_photos AS owner_photos ON owner_user.user_id = owner_photos.user_id
+          LEFT JOIN listing ON listing.listing_id = agreement.listing_id
+          LEFT JOIN payment_info ON owner_user.user_id = payment_info.user_id
+          WHERE agreement.owner_id = ? OR agreement.tenant_id = ?;`,[user_id, user_id]
         );
         return rows;
     } catch (err) {

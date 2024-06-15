@@ -44,9 +44,18 @@ const getListingReviews  = async (listing_id) =>{
 const getUserReviews  = async (user_id) =>{
     const connection = await pool.getConnection();
     try {
-        const [rows] = await connection.execute(`SELECT reviews.*, user.full_name, user_photos.url as photo_url 
-        FROM reviews LEFT JOIN user ON reviews.author_id = user.user_id LEFT JOIN user_photos 
-        ON reviews.author_id = user_photos.user_id  WHERE receiver_id = ? GROUP BY review_id;`,
+        const [rows] = await connection.execute(`SELECT 
+    reviews.*,
+    user.full_name,
+    COALESCE(
+        (SELECT user_photos.url 
+         FROM user_photos 
+         WHERE reviews.author_id = user_photos.user_id 
+         LIMIT 1), 
+        '') AS photo_url FROM 
+    reviews LEFT JOIN 
+    user ON reviews.author_id = user.user_id WHERE 
+    reviews.receiver_id = ? GROUP BY reviews.review_id;`,
         [user_id]);
         return rows;
     } catch (error) {

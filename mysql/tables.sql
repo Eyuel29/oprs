@@ -10,20 +10,19 @@ CREATE TABLE user(
 	email VARCHAR(128) NOT NULL,
     zone VARCHAR(64) NOT NULL,
 	woreda VARCHAR(64) NOT NULL,
+	date_joined TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	account_status INTEGER DEFAULT 2000,
 	region VARCHAR(64) NOT NULL,
     job_type VARCHAR(64) NOT NULL,
-	married BOOL NOT NULL,
-    date_joined TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    user_role INTEGER DEFAULT 1000,
+	married BOOL NOT NULL
 );
 
 ALTER TABLE user ADD CONSTRAINT email_constraint UNIQUE(email);
 
 CREATE TABLE user_auth(
-	user_id SERIAL PRIMARY KEY,
+	user_id BIGINT UNSIGNED PRIMARY KEY,
 	auth_string VARCHAR(128) NOT NULL,
-	user_role INTEGER DEFAULT 1000,
 	foreign key (user_id) references user(user_id) on delete CASCADE on update CASCADE
 );
 
@@ -38,6 +37,7 @@ CREATE TABLE sessions(
     FOREIGN KEY (user_id) REFERENCES user(user_id) on delete CASCADE on update CASCADE
 );
 
+
 CREATE TABLE verification_keys (
     verification_id SERIAL PRIMARY KEY,
     user_id BIGINT UNSIGNED,
@@ -51,7 +51,6 @@ CREATE TABLE listing(
     listing_id SERIAL PRIMARY KEY,
     owner_id BIGINT UNSIGNED,
     type VARCHAR(20) NOT NULL,
-    views INTEGER DEFAULT 0,
     title VARCHAR(64) NOT NULL,
     description TEXT NOT NULL,
     sub_city VARCHAR(20) NOT NULL,
@@ -65,26 +64,27 @@ CREATE TABLE listing(
     building_name VARCHAR(64) NOT NULL,
     date_created VARCHAR(64) NOT NULL,
     furnished VARCHAR(10) NOT NULL,
-    number_of_floors INTEGER DEFAULT 0,
-    loading_docks INTEGER DEFAULT 0,
-    guest_capacity INTEGER DEFAULT 0,
     total_area_square_meter INTEGER NOT NULL,
+    listing_status INTEGER NOT NULL DEFAULT 3000,
+    distance_from_road_in_meters INTEGER DEFAULT 0,
     customer_service_desks INTEGER DEFAULT 0,
     lease_duration_days INTEGER DEFAULT 0,
     number_of_bathrooms INTEGER DEFAULT 0,
     number_of_bedrooms INTEGER DEFAULT 0,
     number_of_kitchens INTEGER DEFAULT 0,
     security_guards INTEGER DEFAULT 0,
-    back_stages INTEGER DEFAULT 0,
-    displays INTEGER DEFAULT 0,
-    floor_number INTEGER DEFAULT 0,
     catering_rooms INTEGER DEFAULT 0,
-    parking_capacity INTEGER DEFAULT 0,
+    floor_number INTEGER DEFAULT 0,
+    back_stages INTEGER DEFAULT 0,
     backrooms INTEGER DEFAULT 0,
-    listing_status INTEGER NOT NULL DEFAULT 3000,
-    distance_from_road_in_meters INTEGER DEFAULT 0,
-    ceiling_height_in_meter INTEGER DEFAULT 0,
+    displays INTEGER DEFAULT 0,
+    views INTEGER DEFAULT 0,
     storage_capacity_square_meter INTEGER DEFAULT 0,
+    parking_capacity INTEGER DEFAULT 0,
+    ceiling_height_in_meter INTEGER DEFAULT 0,
+    number_of_floors INTEGER DEFAULT 0,
+    loading_docks INTEGER DEFAULT 0,
+    guest_capacity INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (owner_id) REFERENCES user(user_id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -120,8 +120,8 @@ CREATE TABLE user_photos(
 
 CREATE TABLE contact_info(
     id SERIAL PRIMARY KEY,
-    user_id BIGINT UNSIGNED,
-    full_name VARCHAR(64) NOT NULL,
+    user_id	 BIGINT UNSIGNED,
+    contact_name VARCHAR(64) NOT NULL,
     contact_address TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -141,24 +141,22 @@ CREATE TABLE reviews(
 
 CREATE TABLE payment_info(
     id SERIAL PRIMARY KEY,
-    sub_account_id VARCHAR(64) NOT NULL,
     user_id BIGINT UNSIGNED,
-    account_number VARCHAR(30) NOT NULL,
-    business_name VARCHAR(100) NOT NULL,
+    sub_account_id VARCHAR(64) NOT NULL,
+    account_number VARCHAR(64) NOT NULL,
+    business_name VARCHAR(128) NOT NULL,
     account_owner_name VARCHAR(64) NOT NULL,
-    bank_id VARCHAR(64) NOT NULL,
+    bank_id VARCHAR(128) NOT NULL,
     bank_name VARCHAR(64) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-
-
-
-
 CREATE TABLE payment_reference(
     id SERIAL PRIMARY KEY,
+    tenant_id BIGINT UNSIGNED,
+    owner_id BIGINT UNSIGNED,
     first_name VARCHAR(64) NOT NULL,
     last_name VARCHAR(64) NOT NULL,
     email VARCHAR(128) NOT NULL,
@@ -174,7 +172,9 @@ CREATE TABLE payment_reference(
     title VARCHAR(32),
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES user(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (owner_id) REFERENCES user(user_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE reservation(
@@ -204,7 +204,7 @@ CREATE TABLE agreement(
     tenant_id BIGINT UNSIGNED,
     owner_id BIGINT UNSIGNED,
     listing_id BIGINT UNSIGNED,    
-    agreement_status INTEGER NOT NULL DEFAULT 1000,
+    agreement_status INTEGER NOT NULL DEFAULT 3000,
     lease_start_date BIGINT UNSIGNED NOT NULL,
     lease_end_date BIGINT UNSIGNED NOT NULL,
     FOREIGN KEY (owner_id) REFERENCES user(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -219,7 +219,7 @@ CREATE TABLE notification(
     title VARCHAR(32) NOT NULL,
     body TEXT NOT NULL,
     viewed BOOLEAN DEFAULT FALSE,
-    date DATETIME NOT NULL,
+    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (initiator_id) REFERENCES user(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (receiver_id) REFERENCES user(user_id) ON DELETE CASCADE ON UPDATE CASCADE
 );

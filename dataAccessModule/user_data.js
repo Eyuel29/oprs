@@ -10,9 +10,6 @@ const createUser = async (user,contactInfo,photoUrl) =>{
         zone,woreda,job_type,age,married,
         account_status,region,user_role} = user;
 
-
-        // console.log(full_name,gender,phone_number,email,zone,woreda,job_type,age,account_status,region,married,user_role);
-
         const [result] = await connection.execute(
             `INSERT INTO user(full_name,gender,phone_number,email,zone,woreda,job_type,age,account_status,region,married,user_role) VALUES(?,?,?,?,?,?,?,?,?,?,?,?);`,
         [full_name,gender,phone_number,email,zone,woreda,job_type,age,account_status,region,married,user_role]);
@@ -90,11 +87,22 @@ const registerUser  = async (userId, authString) =>{
 const getUser = async (userId) =>{
     const connection = await pool.getConnection();
     try {
-        const [rows] = await connection.execute(`SELECT user.*,
-    user_photos.url as photo_url,COALESCE(
-    JSON_ARRAYAGG(JSON_OBJECT('contact_name', contact_info.contact_name, 'contact_address', contact_info.contact_address)),
-    JSON_ARRAY()) AS contact_infos FROM user LEFT JOIN user_photos ON user.user_id = user_photos.user_id LEFT JOIN 
-    contact_info ON user.user_id = contact_info.user_id WHERE user.user_id = ? GROUP BY user.user_id;`, [userId]);
+        const [rows] = await connection.execute(`SELECT 
+    user.*,
+    COALESCE(
+        (SELECT user_photos.url 
+         FROM user_photos 
+         WHERE user.user_id = user_photos.user_id 
+         LIMIT 1), 
+        '') AS photo_url,
+    COALESCE(
+        JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'contact_name', contact_info.contact_name, 
+                'contact_address', contact_info.contact_address
+            )), JSON_ARRAY()) AS contact_infos 
+FROM user LEFT JOIN contact_info ON user.user_id = contact_info.user_id 
+WHERE user.user_id = ? GROUP BY user.user_id;`, [userId]);
         return rows[0];
     } catch (err) {
         throw err;
@@ -106,13 +114,37 @@ const getUser = async (userId) =>{
 const getUserByEmail = async (email) =>{
     const connection = await pool.getConnection();
     try {
-        const [rows] = await connection.execute(`
-    SELECT user.*,
-    user_photos.url as photo_url,
-    user_auth.auth_string as auth_string,
-    COALESCE(JSON_ARRAYAGG(JSON_OBJECT('contact_name', contact_info.contact_name, 'contact_address', contact_info.contact_address) ),
-    JSON_ARRAY()) AS contact_infos FROM user LEFT JOIN user_photos ON user.user_id = user_photos.user_id LEFT JOIN 
-    contact_info ON user.user_id = contact_info.user_id LEFT JOIN user_auth ON user.user_id = user_auth.user_id WHERE user.email = ? GROUP BY user.user_id;`, 
+        const [rows] = await connection.execute(`SELECT 
+    user.*,
+    COALESCE(
+        (SELECT user_photos.url 
+         FROM user_photos 
+         WHERE user.user_id = user_photos.user_id 
+         LIMIT 1), 
+        '') AS photo_url,
+    COALESCE(
+        (SELECT user_auth.auth_string 
+         FROM user_auth 
+         WHERE user.user_id = user_auth.user_id 
+         LIMIT 1), 
+        '') AS auth_string,
+    COALESCE(
+        JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'contact_name', contact_info.contact_name, 
+                'contact_address', contact_info.contact_address
+            )
+        ), 
+        JSON_ARRAY()
+    ) AS contact_infos 
+FROM 
+    user 
+LEFT JOIN 
+    contact_info ON user.user_id = contact_info.user_id 
+WHERE 
+    user.email = ? 
+GROUP BY 
+    user.user_id;`, 
             [email]);
         return rows[0];
     } catch (err) {
@@ -125,11 +157,22 @@ const getUserByEmail = async (email) =>{
 const getAllUsers = async () =>{
     const connection = await pool.getConnection();
     try {
-        const [rows] = await connection.execute(`SELECT user.*,
-        user_photos.url as photo_url,COALESCE(
-        JSON_ARRAYAGG(JSON_OBJECT('contact_name', contact_info.contact_name, 'contact_address', contact_info.contact_address)),
-        JSON_ARRAY()) AS contact_infos FROM user LEFT JOIN user_photos ON user.user_id = user_photos.user_id LEFT JOIN 
-        contact_info ON user.user_id = contact_info.user_id GROUP BY user.user_id;`);
+        const [rows] = await connection.execute(`SELECT 
+    user.*,
+    COALESCE(
+        (SELECT user_photos.url 
+         FROM user_photos 
+         WHERE user.user_id = user_photos.user_id 
+         LIMIT 1), 
+        '') AS photo_url,
+    COALESCE(
+        JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'contact_name', contact_info.contact_name, 
+                'contact_address', contact_info.contact_address
+            )
+        ), JSON_ARRAY()) AS contact_infos FROM user 
+    LEFT JOIN contact_info ON user.user_id = contact_info.user_id GROUP BY user.user_id;`);
         return rows;
     } catch (err) {
         throw err;

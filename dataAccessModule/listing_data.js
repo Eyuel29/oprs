@@ -176,14 +176,24 @@ const getMatchingListing = async (searchQuery, page) => {
     const listing_count = countResult[0].listing_count;
 
     const selectionQuery = `
-      SELECT 
-        listing.*,
-        (SELECT JSON_ARRAYAGG(amenities.name) FROM amenities WHERE amenities.listing_id = listing.listing_id) AS amenities,
-        (SELECT COUNT(*) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS review_count,
-        (SELECT FLOOR(AVG(rating)) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS average_rating,
-        (SELECT JSON_ARRAYAGG(describing_terms.term) FROM describing_terms WHERE describing_terms.listing_id = listing.listing_id) AS describing_terms,
-        (SELECT JSON_ARRAYAGG(listing_photos.url) FROM listing_photos WHERE listing_photos.listing_id = listing.listing_id) AS photo_urls
-      FROM listing ${whereClause}
+    SELECT 
+    listing.*,COALESCE((SELECT JSON_ARRAYAGG(amenities.name) 
+      FROM amenities 
+      WHERE amenities.listing_id = listing.listing_id), JSON_ARRAY()
+    ) AS amenities,COALESCE((SELECT COUNT(*) 
+      FROM reviews 
+      WHERE reviews.reviewed_listing_id = listing.listing_id), 0
+    ) AS review_count,COALESCE((SELECT FLOOR(AVG(rating)) 
+      FROM reviews 
+      WHERE reviews.reviewed_listing_id = listing.listing_id), 0
+    ) AS average_rating,COALESCE((SELECT JSON_ARRAYAGG(describing_terms.term) 
+      FROM describing_terms WHERE describing_terms.listing_id = listing.listing_id), 
+      JSON_ARRAY()) AS describing_terms,
+    COALESCE((SELECT JSON_ARRAYAGG(listing_photos.url) 
+         FROM listing_photos 
+         WHERE listing_photos.listing_id = listing.listing_id), 
+        JSON_ARRAY()
+    ) AS photo_urls FROM listing ${whereClause}
       LIMIT 40 OFFSET ${offset};
     `;
 
@@ -210,13 +220,29 @@ const getOwnerListing = async (owner_id) => {
     const connection = await pool.getConnection();
     try {
       const [rows] = await connection.execute(
-     `SELECT listing.*,(SELECT JSON_ARRAYAGG(amenities.name) FROM amenities WHERE amenities.listing_id = listing.listing_id) AS amenities,
-      (SELECT COUNT(*) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS review_count,
-      (SELECT FLOOR(AVG(rating)) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS average_rating,
-      (SELECT JSON_ARRAYAGG(describing_terms.term) FROM describing_terms WHERE describing_terms.listing_id = listing.listing_id) AS describing_terms,
-      (SELECT JSON_ARRAYAGG(listing_photos.url) FROM listing_photos WHERE listing_photos.listing_id = listing.listing_id)
-      AS photo_urls FROM listing WHERE listing.owner_id = ? GROUP BY listing.listing_id;`, [owner_id]);
-        return rows;
+     `SELECT listing.*,
+      COALESCE((SELECT JSON_ARRAYAGG(amenities.name) 
+          FROM amenities 
+          WHERE amenities.listing_id = listing.listing_id), JSON_ARRAY()
+      ) AS amenities,
+      COALESCE((SELECT COUNT(*) 
+          FROM reviews 
+          WHERE reviews.reviewed_listing_id = listing.listing_id), 0
+      ) AS review_count,
+      COALESCE((SELECT FLOOR(AVG(rating)) 
+          FROM reviews 
+          WHERE reviews.reviewed_listing_id = listing.listing_id), 0
+      ) AS average_rating,
+      COALESCE((SELECT JSON_ARRAYAGG(describing_terms.term) 
+          FROM describing_terms 
+          WHERE describing_terms.listing_id = listing.listing_id), JSON_ARRAY()
+      ) AS describing_terms,
+      COALESCE((SELECT JSON_ARRAYAGG(listing_photos.url) 
+          FROM listing_photos 
+          WHERE listing_photos.listing_id = listing.listing_id), JSON_ARRAY()
+      ) AS photo_urls FROM listing 
+      WHERE listing.owner_id = ? GROUP BY listing.listing_id;`, [owner_id]);
+      return rows;
     } catch (err) {
         throw err;
     } finally {
@@ -309,13 +335,22 @@ const getListing = async (listingId) =>{
     const connection = await pool.getConnection();
     try {
         const [rows] = await connection.execute(
-          `SELECT listing.*,(SELECT JSON_ARRAYAGG(amenities.name) 
-          FROM amenities WHERE amenities.listing_id = listing.listing_id) AS amenities,
-          (SELECT COUNT(*) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS review_count,
-          (SELECT FLOOR(AVG(rating)) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS average_rating,
-          (SELECT JSON_ARRAYAGG(describing_terms.term) FROM describing_terms WHERE describing_terms.listing_id = listing.listing_id) AS describing_terms,
-          (SELECT JSON_ARRAYAGG(listing_photos.url) FROM listing_photos WHERE listing_photos.listing_id = listing.listing_id) AS photo_urls 
-          FROM listing WHERE listing.listing_id = ? GROUP BY listing.listing_id;`,[listingId]);
+          `SELECT 
+          listing.*,COALESCE((SELECT JSON_ARRAYAGG(amenities.name) 
+          FROM amenities WHERE amenities.listing_id = listing.listing_id), JSON_ARRAY()
+          ) AS amenities,
+          COALESCE((SELECT COUNT(*) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id), 0
+          ) AS review_count,
+          COALESCE((SELECT FLOOR(AVG(rating)) FROM reviews 
+              WHERE reviews.reviewed_listing_id = listing.listing_id), 0
+          ) AS average_rating,
+          COALESCE((SELECT JSON_ARRAYAGG(describing_terms.term) FROM describing_terms 
+              WHERE describing_terms.listing_id = listing.listing_id), JSON_ARRAY()
+          ) AS describing_terms,
+          COALESCE((SELECT JSON_ARRAYAGG(listing_photos.url) FROM listing_photos 
+              WHERE listing_photos.listing_id = listing.listing_id), JSON_ARRAY()
+          ) AS photo_urls FROM listing 
+          WHERE listing.listing_id = ? GROUP BY listing.listing_id;`,[listingId]);
         return rows[0];
     } catch (err) {
         throw err;

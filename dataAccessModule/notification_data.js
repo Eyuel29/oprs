@@ -19,7 +19,8 @@ const getNotifications = async (user_id) => {
     const connection = await pool.getConnection();
     try {
         const [rows] = await connection.execute(
-    `SELECT notification.*, 
+    `SELECT 
+    notification.*, 
     JSON_OBJECT(
         'user_id', user.user_id,
         'full_name', user.full_name,
@@ -34,17 +35,26 @@ const getNotifications = async (user_id) => {
         'region', user.region,
         'job_type', user.job_type,
         'married', user.married,
-        'photo_url', COALESCE(JSON_OBJECT('url', user_photos.url),
-        JSON_ARRAY()),'contact_infos', COALESCE(JSON_ARRAYAGG(JSON_OBJECT(
-        'contact_name',contact_info.contact_name, 
-        'contact_address', contact_info.contact_address
-        )), JSON_ARRAY())
+        'photo_url', COALESCE(
+            (SELECT user_photos.url 
+             FROM user_photos 
+             WHERE user.user_id = user_photos.user_id 
+             LIMIT 1), 
+            JSON_ARRAY()
+        ),
+        'contact_infos', COALESCE(
+            JSON_ARRAYAGG(
+                JSON_OBJECT(
+                    'contact_name', contact_info.contact_name, 
+                    'contact_address', contact_info.contact_address
+                )
+            ), 
+            JSON_ARRAY()
+        )
     ) AS initiator FROM notification 
     LEFT JOIN user ON notification.initiator_id = user.user_id 
-    LEFT JOIN user_photos ON user.user_id = user_photos.user_id 
     LEFT JOIN contact_info ON user.user_id = contact_info.user_id 
-    WHERE notification.receiver_id = ? 
-    GROUP BY notification.notification_id, user.user_id;`,[user_id]);
+    WHERE notification.receiver_id = ? GROUP BY notification.notification_id, user.user_id;`,[user_id]);
 
     await connection.execute(`UPDATE notification SET viewed = TRUE WHERE receiver_id = ?;`,[user_id]);
     return rows;
