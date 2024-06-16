@@ -163,11 +163,10 @@ const getReservations = async (req, res) => {
     }
 }
 
-
 const getTenantReservations = async (req, res) => {
     try {
         const tenant_id = req?.userId;
-        const result = await reservationData.getRequests(tenant_id);
+        const result = await reservationData.getReservations(tenant_id);
         return res.status(200).json({
             success : true,
             message : "Successfully loaded your requests!",

@@ -16,8 +16,6 @@ const signout = async (req, res) => {
     
     const cookieSessionId = cookies.session_id;
 
-    console.log("shit");
-
     const result = await sessionData.deleteUserSession(cookieSessionId);
 
     if (result.affectedRows < 1) {
@@ -116,8 +114,6 @@ const register = async (req, res) => {
                 }   
                 if (!uploaded_file) return sendErrorResponse(res, 500, "Internal server error! Couldn't upload the file!");
             }
-
-
 
             const userRegRes = await userData.createUser({ 
                 full_name,gender,phone_number,email,zone,user_role,
