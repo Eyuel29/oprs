@@ -120,6 +120,9 @@ const getListingPage = async (page, filterModel) => {
       FROM listing
       ${whereClause ? `WHERE ${whereClause}` : ''}
       LIMIT 40 OFFSET ${offset};`;
+
+      console.log(selectionQuery);
+
     const [rows] = await connection.execute(selectionQuery);
     
     if (rows && rows.length > 0) {

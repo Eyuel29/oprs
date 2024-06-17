@@ -2,16 +2,19 @@ const paymentData = require('../dataAccessModule/payment_data');
 const { getUser } = require('../dataAccessModule/user_data');
 const sendErrorResponse = require('../utils/sendErrorResponse');
 const crypto = require('crypto');
-const axios = require('axios');
+const instance = require('axios');
 const CSK = process.env.CSK;
+
+
+const axios = instance.create({
+    validateStatus: function (status) {return status < 500;}
+});
 
 const deleteSubAccount = async (req, res) =>{
     try {
         if (!req?.userId) return sendErrorResponse(res, 400, "Payment initialization failed!");
         const userId = req?.userId;
         const deleteSubAccountResullt = await paymentData.deleteSubAccount(userId);
-
-        console.log(deleteSubAccountResullt);
 
         if (deleteSubAccountResullt.affectedRows < 1) return sendErrorResponse(
             res,500,"Internal server error, Couldn't delete the sub-accunt!");
@@ -94,8 +97,6 @@ const createSubAccount = async (req, res) =>{
             },
         );
 
-        consoe.log(response.data);
-
         const sub_account_id = response.data.data["subaccounts[id]"];
 
         const result = await paymentData.createSubAccount(
@@ -113,9 +114,7 @@ const createSubAccount = async (req, res) =>{
             "success" : true,
             "message" : "Sub-account created successfully!"
         });
-
     } catch (error) {
-        console.log(error.response);
         return sendErrorResponse(res, 500, "Internal server error, Couldn't create the subaccount!");
     }
 }
@@ -130,12 +129,18 @@ const initialize = async (req, res) =>{
         !req?.body?.receiver_id
     ) return sendErrorResponse(res, 400, "Incomplete information!");
 
+    console.log(req?.body?.title,
+        req?.body?.description,
+        req?.body?.amount,
+        req?.body?.currency,
+        req?.body?.receiver_id);
+
     if (!req?.userId) return sendErrorResponse(res, 400, "Payment initialization failed!");
     const userId = req?.userId;
 
-    const paymentReceiverData = await paymentData.getPaymentInfo(req?.body?.receiver_id);
+//    const paymentReceiverData = await paymentData.getPaymentInfo(req?.body?.receiver_id);
 
-    if (!paymentReceiverData) return sendErrorResponse(res,500,"Internal server error, Couldn't initialize the payment!");
+//    if (!paymentReceiverData) return sendErrorResponse(res,500,"Internal server error, Couldn't initialize the payment!");
     const {title,description,amount,currency} = req?.body;
 
     const payee = await getUser(userId);
@@ -172,6 +177,7 @@ const initialize = async (req, res) =>{
         },
     );
 
+
     res.status(200).json({ 
         "success" : true,
         "body" : {
@@ -182,6 +188,7 @@ const initialize = async (req, res) =>{
     });
 
     }catch(error){
+        console.log(error);
         return sendErrorResponse(res, 500, "Internal server error!");
     }
 }
@@ -211,7 +218,6 @@ const verifyPayment = async (req, res) =>{
         };
 
         const result = await paymentData.createPaymentReference(reference);
-
 
         if(result.affectedRows < 1){sendErrorResponse(res,500,"Internal server error");}
         res.status(200).json({

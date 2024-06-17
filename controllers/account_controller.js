@@ -37,7 +37,6 @@ const signin = async (req, res) => {
         if (!email || !password) return sendErrorResponse(res, 400, "Please provide email and password!");
 
         const foundUser = await getUserByEmail(email);
-        console.log(foundUser);
         if (!foundUser  || !foundUser.user_role) return sendErrorResponse(res, 400, "User not found!");
         const match = await bcrypt.compare(password, foundUser.auth_string);
 
@@ -201,9 +200,6 @@ const getMyAgreements = async (req, res) =>{
         if(!user_id) return sendErrorResponse(res, 400, "Incomplete information!");
 
         const agreements = await agreementData.getAgreements(user_id);
-
-        console.log(agreements);
-
         return res.status(200).json({
             "success" : true,
             "message": "Loading user's agreements!",

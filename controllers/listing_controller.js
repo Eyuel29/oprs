@@ -3,7 +3,7 @@ const { handleFileUpload, uploadPhoto, deleteFolder } = require('../dataAccessMo
 const sendErrorResponse = require('../utils/sendErrorResponse');
 const {getDate} = require('../utils/date');
 
-    const createListing = async (req, res) =>{
+const createListing = async (req, res) =>{
         try {
             handleFileUpload(req, res, async (err) => {
             if(
@@ -119,6 +119,7 @@ const {getDate} = require('../utils/date');
         return sendErrorResponse(res,500,"Internal server error!");
     }
 }
+
 const modifyListing = async (req, res) =>{
     try {
         handleFileUpload(req, res, async (err) => {
@@ -359,6 +360,7 @@ const getPageListing = async (req, res) => {
 
       if (!page) return sendErrorResponse(res, 400, "Incomplete information!, No page number!");      
       var result = await listingData.getListingPage(page, filterModel); 
+
       return res.status(200).json({
           success: true,
           message: `successfully loaded page ${page} listings!`,
@@ -367,7 +369,6 @@ const getPageListing = async (req, res) => {
       });
 
     } catch (error) {
-      console.log(error);
       return sendErrorResponse(res, 500, "Internal server error!");
     }
 }

@@ -59,8 +59,8 @@ const getReservations = async (owner_id) => {
             FROM reservation 
             LEFT JOIN user ON user.user_id = reservation.tenant_id 
             LEFT JOIN listing ON reservation.listing_id = listing.listing_id 
-            WHERE reservation.owner_id = ? AND reservation.status = 2000;`,
-            [owner_id]
+            WHERE ( reservation.owner_id = ? OR reservation.tenant_id = ? ) AND reservation.status = 2000;`,
+            [owner_id,owner_id]
         );
         return rows;
     } catch (err) {
