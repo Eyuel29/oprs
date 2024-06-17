@@ -55,7 +55,7 @@ const getMyPaymentInfo = async (req, res) =>{
         if(!owner_id) return sendErrorResponse(res, 400, "Invalid information, no owner specified!");
 
         const paymentInfo = await paymentData.getPaymentInfo(owner_id);
-        if(!paymentInfo) return sendErrorResponse(res, 404, "The owner has no payment information specified!");
+        if(!paymentInfo) return sendErrorResponse(res, 404, "No payment information!");
 
         res.status(200).json({ 
             "success" : true,
@@ -216,9 +216,8 @@ const verifyPayment = async (req, res) =>{
             "created_at" : response.data.created_at ?? "",
             "updated_at" : response.data.updated_at ?? "",
         };
-
+        
         const result = await paymentData.createPaymentReference(reference);
-
         if(result.affectedRows < 1){sendErrorResponse(res,500,"Internal server error");}
         res.status(200).json({
             "success" : true,

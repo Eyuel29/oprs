@@ -1,14 +1,14 @@
 require('dotenv').config();
 const pool = require('../config/db');
-const {toTimestamp} = require('../utils/date');
 
 const createAgreement = async (agreement, lease_duration, check_in_date) => {
     const connection = await pool.getConnection();
     try {
       const { tenant_id, owner_id, listing_id } = agreement;
-      const lease_start_date = toTimestamp(check_in_date);
+      const lease_start_date = new Date(check_in_date).getTime();
       const lease_duration_mill = lease_duration * 24 * 60 * 60 * 1000;
       const lease_end_date = lease_start_date + lease_duration_mill;
+
       const [result] = await connection.execute(
         `INSERT INTO agreement(
           tenant_id,
@@ -21,6 +21,7 @@ const createAgreement = async (agreement, lease_duration, check_in_date) => {
       );
   
       return result;
+
     } catch (error) {
       throw error;
     } finally {
