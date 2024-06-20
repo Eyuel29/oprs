@@ -18,7 +18,7 @@ const reportListing = async (userId,listingId,reportDate,reportBody) =>{
 const getListingCount = async (filterModel) => {
   const connection = await pool.getConnection();
   try {
-    let whereClause = '';
+    let whereClause = ' WHERE listing_status = 3000 ';
     let AND = '';
 
     for (const property in filterModel) {
@@ -67,7 +67,7 @@ const getListingPage = async (page, filterModel) => {
 
   try {
     const offset = (page - 1) * 40;
-    let whereClause = '';
+    let whereClause = ' WHERE listing_status = 3000 ';
     let AND = '';
 
     if (filterModel) {
@@ -160,55 +160,67 @@ const getMatchingListing = async (searchQuery, page) => {
   const connection = await pool.getConnection();
   try {
     const offset = (page - 1) * 40;
-    let whereClause = 'WHERE listing_status = 3000';
+    let whereClause = ' WHERE listing.listing_status = 3000 ';
     let searchValues = [];
 
     if (searchQuery) {
-      const searchColumns = ['title', 'description', 'building_name', 'sub_city', 'woreda', 'area_name'];
-      const searchConditions = searchColumns.map(column => `listing.${column} LIKE ?`).join(' OR ');
+      const searchColumns = ['title', 'description', 'building_name', 'sub_city', 'woreda', 'area_name', 'describing_terms.term'];
+      const searchConditions = searchColumns.map(column => `listing.${column} LIKE ?`).join(' OR ') + ' OR describing_terms.term LIKE ?';
       whereClause += ` AND (${searchConditions})`;
       searchValues = Array(searchColumns.length).fill(`%${searchQuery}%`);
     }
-
     const countQuery = `
-      SELECT COUNT(*) AS listing_count
-      FROM listing ${whereClause};
-    `;
-
+      SELECT COUNT(DISTINCT listing.listing_id) AS listing_count
+      FROM listing
+      LEFT JOIN describing_terms ON listing.listing_id = describing_terms.listing_id
+      ${whereClause};`;
     const [countResult] = await connection.execute(countQuery, searchValues);
     const listing_count = countResult[0].listing_count;
-
     const selectionQuery = `
-    SELECT 
-    listing.*,COALESCE((SELECT JSON_ARRAYAGG(amenities.name) 
-      FROM amenities 
-      WHERE amenities.listing_id = listing.listing_id), JSON_ARRAY()
-    ) AS amenities,COALESCE((SELECT COUNT(*) 
-      FROM reviews 
-      WHERE reviews.reviewed_listing_id = listing.listing_id), 0
-    ) AS review_count,COALESCE((SELECT FLOOR(AVG(rating)) 
-      FROM reviews 
-      WHERE reviews.reviewed_listing_id = listing.listing_id), 0
-    ) AS average_rating,COALESCE((SELECT JSON_ARRAYAGG(describing_terms.term) 
-      FROM describing_terms WHERE describing_terms.listing_id = listing.listing_id), 
-      JSON_ARRAY()) AS describing_terms,
-    COALESCE((SELECT JSON_ARRAYAGG(listing_photos.url) 
-         FROM listing_photos 
-         WHERE listing_photos.listing_id = listing.listing_id), 
-        JSON_ARRAY()
-    ) AS photo_urls FROM listing ${whereClause}
-      LIMIT 40 OFFSET ${offset};
-    `;
-
+      SELECT 
+        listing.*, 
+        COALESCE(
+          (SELECT JSON_ARRAYAGG(amenities.name) 
+           FROM amenities 
+           WHERE amenities.listing_id = listing.listing_id), 
+          JSON_ARRAY()
+        ) AS amenities, 
+        COALESCE(
+          (SELECT COUNT(*) 
+           FROM reviews 
+           WHERE reviews.reviewed_listing_id = listing.listing_id), 
+          0
+        ) AS review_count, 
+        COALESCE(
+          (SELECT FLOOR(AVG(rating)) 
+           FROM reviews 
+           WHERE reviews.reviewed_listing_id = listing.listing_id), 
+          0
+        ) AS average_rating, 
+        COALESCE(
+          (SELECT JSON_ARRAYAGG(describing_terms.term) 
+           FROM describing_terms 
+           WHERE describing_terms.listing_id = listing.listing_id), 
+          JSON_ARRAY()
+        ) AS describing_terms,
+        COALESCE(
+          (SELECT JSON_ARRAYAGG(listing_photos.url) 
+           FROM listing_photos 
+           WHERE listing_photos.listing_id = listing.listing_id), 
+          JSON_ARRAY()
+        ) AS photo_urls 
+      FROM listing
+      LEFT JOIN describing_terms ON listing.listing_id = describing_terms.listing_id
+      ${whereClause}
+      GROUP BY listing.listing_id
+      LIMIT 40 OFFSET ${offset};`;
     const [rows] = await connection.execute(selectionQuery, searchValues);
-
     if (rows && rows.length > 0) {
       const listing_ids = rows.map((l) => l.listing_id);
       const idList = listing_ids.join(',');
       const updateQuery = `UPDATE listing SET views = views + 1 WHERE listing_id IN (${idList})`;
       await connection.execute(updateQuery);
     }
-
     return { listing_count, listings: rows };
   } catch (err) {
     throw err;
@@ -216,8 +228,6 @@ const getMatchingListing = async (searchQuery, page) => {
     connection.release();
   }
 };
-
-
 
 const getOwnerListing = async (owner_id) => {
     const connection = await pool.getConnection();
