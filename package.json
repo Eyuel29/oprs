@@ -22,8 +22,7 @@
     "uuid": "^9.0.1"
   },
   "scripts": {
-    "start": "node app.js",
-    "live": "nodemon app.js"
+    "start": "node app.js"
   },
   "name": "oprs",
   "version": "0.1",
