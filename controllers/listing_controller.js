@@ -369,6 +369,7 @@ const getPageListing = async (req, res) => {
       });
 
     } catch (error) {
+      console.log(error);
       return sendErrorResponse(res, 500, "Internal server error!");
     }
 }
@@ -391,6 +392,7 @@ const getMatchingListing = async (req, res) => {
       });
       
     } catch (error) {
+      console.log(error);
       return sendErrorResponse(res, 500, "Internal server error!");
     }
 }
