@@ -18,7 +18,7 @@ const reportListing = async (userId,listingId,reportDate,reportBody) =>{
 const getListingCount = async (filterModel) => {
   const connection = await pool.getConnection();
   try {
-    let whereClause = ' WHERE listing_status = 3000 ';
+    let whereClause = ' listing_status = 3000 ';
     let AND = '';
 
     for (const property in filterModel) {
@@ -67,7 +67,7 @@ const getListingPage = async (page, filterModel) => {
 
   try {
     const offset = (page - 1) * 40;
-    let whereClause = ' WHERE listing_status = 3000 ';
+    let whereClause = ' listing_status = 3000 ';
     let AND = '';
 
     if (filterModel) {
@@ -120,8 +120,6 @@ const getListingPage = async (page, filterModel) => {
       FROM listing
       ${whereClause ? `WHERE ${whereClause}` : ''}
       LIMIT 40 OFFSET ${offset};`;
-
-      console.log(selectionQuery);
 
     const [rows] = await connection.execute(selectionQuery);
     
