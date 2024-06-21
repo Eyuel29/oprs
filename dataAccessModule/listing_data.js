@@ -165,8 +165,9 @@ const getMatchingListing = async (searchQuery, page) => {
       const searchColumns = ['title', 'description', 'building_name', 'sub_city', 'woreda', 'area_name', 'describing_terms.term'];
       const searchConditions = searchColumns.map(column => `listing.${column} LIKE ?`).join(' OR ') + ' OR describing_terms.term LIKE ?';
       whereClause += ` AND (${searchConditions})`;
-      searchValues = Array(searchColumns.length).fill(`%${searchQuery}%`);
+      searchValues = Array(searchColumns.length + 1).fill(`%${searchQuery}%`);
     }
+
     const countQuery = `
       SELECT COUNT(DISTINCT listing.listing_id) AS listing_count
       FROM listing
@@ -174,6 +175,7 @@ const getMatchingListing = async (searchQuery, page) => {
       ${whereClause};`;
     const [countResult] = await connection.execute(countQuery, searchValues);
     const listing_count = countResult[0].listing_count;
+
     const selectionQuery = `
       SELECT 
         listing.*, 
@@ -211,14 +213,18 @@ const getMatchingListing = async (searchQuery, page) => {
       LEFT JOIN describing_terms ON listing.listing_id = describing_terms.listing_id
       ${whereClause}
       GROUP BY listing.listing_id
-      LIMIT 40 OFFSET ${offset};`;
-    const [rows] = await connection.execute(selectionQuery, searchValues);
+      LIMIT 40 OFFSET ?;`;
+
+    // Use prepared statements with parameterized queries to avoid SQL injection
+    const [rows] = await connection.execute(selectionQuery, [...searchValues, offset]);
+
     if (rows && rows.length > 0) {
       const listing_ids = rows.map((l) => l.listing_id);
       const idList = listing_ids.join(',');
       const updateQuery = `UPDATE listing SET views = views + 1 WHERE listing_id IN (${idList})`;
       await connection.execute(updateQuery);
     }
+
     return { listing_count, listings: rows };
   } catch (err) {
     throw err;
@@ -226,6 +232,7 @@ const getMatchingListing = async (searchQuery, page) => {
     connection.release();
   }
 };
+
 
 const getOwnerListing = async (owner_id) => {
     const connection = await pool.getConnection();
