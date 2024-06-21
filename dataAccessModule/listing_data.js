@@ -121,6 +121,8 @@ const getListingPage = async (page, filterModel) => {
       ${whereClause ? `WHERE ${whereClause}` : ''}
       LIMIT 40 OFFSET ${offset};`;
 
+
+
     const [rows] = await connection.execute(selectionQuery);
     
     if (rows && rows.length > 0) {
@@ -169,8 +171,6 @@ const getMatchingListing = async (searchQuery, page) => {
       searchValues = Array(searchColumns.length).fill(`%${searchQuery}%`).concat(`%${searchQuery}%`);
     }
 
-    console.log(whereClause, searchValues);
-
     const countQuery = `
       SELECT COUNT(DISTINCT listing.listing_id) AS listing_count
       FROM listing
@@ -180,30 +180,16 @@ const getMatchingListing = async (searchQuery, page) => {
     const [countResult] = await connection.execute(countQuery, searchValues);
     const listing_count = countResult[0].listing_count;
     
-    const selectionQuery = `SELECT listing.*, 
-        COALESCE(
-        (SELECT JSON_ARRAYAGG(amenities.name) 
-          FROM amenities 
-          WHERE amenities.listing_id = listing.listing_id), JSON_ARRAY()) AS amenities, 
-        COALESCE(
-        (SELECT COUNT(*) 
-          FROM reviews 
-          WHERE reviews.reviewed_listing_id = listing.listing_id), 0) AS review_count, 
-        COALESCE(
-        (SELECT FLOOR(AVG(rating)) 
-          FROM reviews 
-          WHERE reviews.reviewed_listing_id = listing.listing_id), 0) AS average_rating, 
-        COALESCE(
-        (SELECT JSON_ARRAYAGG(describing_terms.term) 
-          FROM describing_terms 
-          WHERE describing_terms.listing_id = listing.listing_id), JSON_ARRAY()) AS describing_terms,
-        COALESCE(
-        (SELECT JSON_ARRAYAGG(listing_photos.url) 
-          FROM listing_photos 
-          WHERE listing_photos.listing_id = listing.listing_id), JSON_ARRAY()) AS photo_urls FROM listing
-      LEFT JOIN describing_terms ON listing.listing_id = describing_terms.listing_id ${whereClause} GROUP BY listing.listing_id LIMIT 40 OFFSET ?;`;
+    const selectionQuery = `SELECT listing.*, COALESCE((SELECT JSON_ARRAYAGG(amenities.name)
+     FROM amenities WHERE amenities.listing_id = listing.listing_id), JSON_ARRAY()) AS amenities,
+      COALESCE((SELECT COUNT(*) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id), 0) AS review_count,
+      COALESCE((SELECT FLOOR(AVG(rating)) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id), 0) AS average_rating, 
+      COALESCE((SELECT JSON_ARRAYAGG(describing_terms.term) FROM describing_terms WHERE describing_terms.listing_id = listing.listing_id), JSON_ARRAY()) AS describing_terms, 
+      COALESCE((SELECT JSON_ARRAYAGG(listing_photos.url) FROM listing_photos WHERE listing_photos.listing_id = listing.listing_id), JSON_ARRAY()) AS photo_urls 
+      FROM listing LEFT JOIN describing_terms ON listing.listing_id = describing_terms.listing_id ${whereClause} 
+      GROUP BY listing.listing_id LIMIT 40 OFFSET ${offset};`;
 
-    const [rows] = await connection.execute(selectionQuery, [...searchValues, offset]);
+    const [rows] = await connection.execute(selectionQuery, searchValues);
 
     if (rows && rows.length > 0) {
       const listing_ids = rows.map((l) => l.listing_id);
@@ -220,7 +206,7 @@ const getMatchingListing = async (searchQuery, page) => {
   }
 };
 
-
+getMatchingListing("some",1);
 
 const getOwnerListing = async (owner_id) => {
     const connection = await pool.getConnection();
