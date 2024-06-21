@@ -9,6 +9,6 @@ router.get('/myInfo',verifyUserSession,verifyRoles(ROLES_LIST.LANDLORD),paymentC
 router.post('/createSubAccount',verifyUserSession,verifyRoles(ROLES_LIST.LANDLORD),paymentController.createSubAccount);
 router.delete('/deleteSubAccount',verifyUserSession,verifyRoles(ROLES_LIST.LANDLORD),paymentController.deleteSubAccount);
 router.post('/initialize', verifyUserSession,verifyRoles(ROLES_LIST.TENANT),paymentController.initialize);
-router.get('/verify', verifyUserSession,verifyRoles(ROLES_LIST.TENANT),paymentController.verifyPayment);
+router.get('/verify',paymentController.verifyPayment);
 
 module.exports = router;

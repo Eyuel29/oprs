@@ -195,7 +195,7 @@ const getMatchingListing = async (searchQuery, page) => {
       const listing_ids = rows.map((l) => l.listing_id);
       const idList = listing_ids.join(',');
       const updateQuery = `UPDATE listing SET views = views + 1 WHERE listing_id IN (${idList})`;
-      await connection.execute(updateQuery);
+      await connection.execute(updateQuery); 
     }
 
     return { listing_count, listings: rows };

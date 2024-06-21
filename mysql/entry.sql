@@ -1,7 +1,7 @@
 INSERT INTO user(full_name, gender,phone_number,email,zone,woreda,job_type,region,age,account_status,married, user_role)VALUES
 ('Eyuel Dejene','male',251958031425,'fnmnqxnsdh@gmail.com','KOLFE KERANIO','01','Account','Addis Ababa',30,3000,false, 3000),
 ('Abebe Kebede','male',251906212658,'xyusnzlcot@gmail.com','BOLE','01','Account','Addis Ababa',30,3000,false, 1000),
-('Eyuel Dejene','male',251986725521,'ajwijnkcat@gmail.com','GULELE','01','Account','Addis Ababa',30,3000,false, 2000),
+('Eyuel Dejene','male',251986725521,'dejenejoel@gmail.com','GULELE','01','Account','Addis Ababa',30,3000,false, 2000),
 ('Muluken Mengistu','male',251974207517,'rggvztqjty@gmail.com','ARADA','01','Account','Addis Ababa',30,3000,false, 1000),
 ('Melkam Mickiael','female',251933505531,'zhjwiyqwtl@gmail.com','KOLFE KERANIO','01','Account','Addis Ababa',30,3000,false, 2000),
 ('Ezana Mulgeta','male',251924544077,'dmlstactar@gmail.com','KOLFE KERANIO','01','Account','Addis Ababa',30,3000,false, 3000),
@@ -13,7 +13,7 @@ INSERT INTO user(full_name, gender,phone_number,email,zone,woreda,job_type,regio
 INSERT INTO passwords(user_id, pass) VALUES
 (1 ,'usxbmnly'),
 (2 ,'nneuvmlf'),
-(3 ,'aywdnldt'),
+(3 ,'1234asdf'),
 (4 ,'cwumjhea'),
 (5 ,'hfhhtgsx'),
 (6 ,'qmjksifv'),

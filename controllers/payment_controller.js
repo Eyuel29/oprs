@@ -1,6 +1,9 @@
+const notificationData = require('../dataAccessModule/notification_data');
+const notificationTypes = require('../config/notification_types');
 const paymentData = require('../dataAccessModule/payment_data');
-const { getUser } = require('../dataAccessModule/user_data');
 const sendErrorResponse = require('../utils/sendErrorResponse');
+const {getDate} = require('../utils/date');
+const { getUser } = require('../dataAccessModule/user_data');
 const crypto = require('crypto');
 const instance = require('axios');
 const CSK = process.env.CSK;
@@ -121,26 +124,21 @@ const createSubAccount = async (req, res) =>{
 
 const initialize = async (req, res) =>{
   try{
-    
-    if (!req?.body?.title ||
+    if (
+        !req?.body?.title ||
         !req?.body?.description ||
         !req?.body?.amount ||
         !req?.body?.currency ||
         !req?.body?.receiver_id
     ) return sendErrorResponse(res, 400, "Incomplete information!");
 
-    console.log(req?.body?.title,
-        req?.body?.description,
-        req?.body?.amount,
-        req?.body?.currency,
-        req?.body?.receiver_id);
-
     if (!req?.userId) return sendErrorResponse(res, 400, "Payment initialization failed!");
     const userId = req?.userId;
+    const ownerId = req?.body?.receiver_id;
 
 //    const paymentReceiverData = await paymentData.getPaymentInfo(req?.body?.receiver_id);
+//    if (!paymentReceiverData) return sendErrorResponse(res,404,"Owner has no patment information!");
 
-//    if (!paymentReceiverData) return sendErrorResponse(res,500,"Internal server error, Couldn't initialize the payment!");
     const {title,description,amount,currency} = req?.body;
 
     const payee = await getUser(userId);
@@ -164,7 +162,7 @@ const initialize = async (req, res) =>{
           amount: amount,
           tx_ref: txReference,
           phone_number: phone_number,
-          callback_url: 'https://example.com/',
+          callback_url: `https://api.chapa.co/v1/transaction/verify/${txReference}`,
           return_url: '',
           "customization[title]": title ?? 'Title',
           "customization[description]": description ?? 'Description',
@@ -177,6 +175,9 @@ const initialize = async (req, res) =>{
         },
     );
 
+    await paymentData.createPaymentReference(userId, ownerId, txReference);
+
+    console.log(response.data.data);
 
     res.status(200).json({ 
         "success" : true,
@@ -193,12 +194,20 @@ const initialize = async (req, res) =>{
     }
 }
 
-
 const verifyPayment = async (req, res) =>{
     try {
         const tReference = req.param.tReference;
         if (!tReference) return sendErrorResponse(res, 400, "Couldn't verify the payment!");
-        const response = await chapa.verify({tx_ref: tReference});
+
+        const response = await axios.get(
+            `https://api.chapa.co/v1/transaction/verify/${tReference}`,
+            {
+                headers : {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${CSK}`,
+                }
+            },
+        );
 
         const reference = {
             "first_name" : response.data.first_name ?? "",
@@ -217,8 +226,23 @@ const verifyPayment = async (req, res) =>{
             "updated_at" : response.data.updated_at ?? "",
         };
         
-        const result = await paymentData.createPaymentReference(reference);
-        if(result.affectedRows < 1){sendErrorResponse(res,500,"Internal server error");}
+        const result = await paymentData.verifyPaymentReference(reference);
+
+        if(result.affectedRows < 1) return sendErrorResponse(res, 500, "Internal server error!, could not verify the payment!");
+
+        const refrence = await paymentData.getPaymentReference(tReference);
+
+        await notificationData.createNotification(
+            refrence.tenant_id,
+            refrence.owner_id,
+            notificationTypes.PAYMENT,
+            "Payment Received",
+            `Dear User You have received a payment from ${reference.tenant.full_name}
+            for the amount of ${reference.amount} in ${reference.currency}. The transaction reference is 
+            ${reference.reference}. Thank you for using our service!`,
+            getDate()
+        );
+
         res.status(200).json({
             "success" : true,
             "message" : "Payment successful",
@@ -226,6 +250,7 @@ const verifyPayment = async (req, res) =>{
         });
 
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res, 500, "Couldn't verify the payment!");
     }
 }
