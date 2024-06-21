@@ -162,10 +162,11 @@ const getMatchingListing = async (searchQuery, page) => {
     let searchValues = [];
 
     if (searchQuery) {
-      const searchColumns = ['title', 'description', 'building_name', 'sub_city', 'woreda', 'area_name', 'describing_terms.term'];
-      const searchConditions = searchColumns.map(column => `listing.${column} LIKE ?`).join(' OR ') + ' OR describing_terms.term LIKE ?';
-      whereClause += ` AND (${searchConditions})`;
-      searchValues = Array(searchColumns.length + 1).fill(`%${searchQuery}%`);
+      const searchColumns = ['title', 'description', 'building_name', 'sub_city', 'woreda', 'area_name'];
+      const searchConditions = searchColumns.map(column => `listing.${column} LIKE ?`).join(' OR ');
+      const describingTermsCondition = 'describing_terms.term LIKE ?';
+      whereClause += ` AND (${searchConditions} OR ${describingTermsCondition})`;
+      searchValues = Array(searchColumns.length).fill(`%${searchQuery}%`).concat(`%${searchQuery}%`);
     }
 
     const countQuery = `
@@ -232,6 +233,7 @@ const getMatchingListing = async (searchQuery, page) => {
     connection.release();
   }
 };
+
 
 
 const getOwnerListing = async (owner_id) => {
