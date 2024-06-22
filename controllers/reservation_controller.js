@@ -92,12 +92,10 @@ const approveReservationRequest = async (req, res) =>{
         const lease_duration = listing.lease_duration_days;
         const check_in_date = reservation.stay_dates[0] ?? new Date().toISOString();
 
-        await agreementData.createAgreement(
-            agreement,
-            lease_duration,
-            check_in_date
-        );
+        console.log("check_in_date : " +check_in_date);
+        console.log("lease_duration : "+lease_duration);
 
+        await agreementData.createAgreement(agreement,lease_duration,check_in_date);
         await listingData.setUnAvailable(listing.listing_id);
 
         await notificationData.createNotification(
@@ -113,6 +111,7 @@ const approveReservationRequest = async (req, res) =>{
             success : true,
             message : "successfully approved the reservation request!",
         });
+
     } catch (error) {
         console.log(error);
         return sendErrorResponse(res,500,"Internal server error!");
