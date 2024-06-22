@@ -13,7 +13,7 @@ INSERT INTO user(full_name, gender,phone_number,email,zone,woreda,job_type,regio
 INSERT INTO passwords(user_id, pass) VALUES
 (1 ,'usxbmnly'),
 (2 ,'nneuvmlf'),
-(3 ,'1234asdf'),
+(3 ,'aywdnldt'),
 (4 ,'cwumjhea'),
 (5 ,'hfhhtgsx'),
 (6 ,'qmjksifv'),

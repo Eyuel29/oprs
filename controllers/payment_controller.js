@@ -162,7 +162,7 @@ const initialize = async (req, res) =>{
           amount: amount,
           tx_ref: txReference,
           phone_number: phone_number,
-          callback_url: `https://api.chapa.co/v1/transaction/verify/${txReference}`,
+          callback_url: `https://oprs.vercel.app/payment/verify/${txReference}`,
           return_url: '',
           "customization[title]": title ?? 'Title',
           "customization[description]": description ?? 'Description',
@@ -199,8 +199,7 @@ const verifyPayment = async (req, res) =>{
         const tReference = req.param.tReference;
         if (!tReference) return sendErrorResponse(res, 400, "Couldn't verify the payment!");
 
-        const response = await axios.get(
-            `https://api.chapa.co/v1/transaction/verify/${tReference}`,
+        const response = await axios.get(`https://api.chapa.co/v1/transaction/verify/${tReference}`,
             {
                 headers : {
                 "Content-Type": "application/json",
