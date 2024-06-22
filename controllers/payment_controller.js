@@ -208,37 +208,39 @@ const verifyPayment = async (req, res) =>{
             },
         );
 
+        console.log(response.data.data);
+
         const reference = {
-            "first_name" : response.data.first_name ?? "",
-            "last_name" : response.data.last_name ?? "",
-            "email" : response.data.email ?? "",
-            "currency" : response.data.currency ?? "",
-            "amount" : response.data.amount ?? "",
-            "charge" : response.data.charge ?? "",
-            "mode" : response.data.mode ?? "",
-            "method" : response.data.method ?? "",
-            "type" : response.data.type ?? "",
-            "status" : response.data.status ?? "",
-            "reference" : response.data.reference ?? "",
-            "tReference" : response.data.tx_ref ?? "",
-            "created_at" : response.data.created_at ?? "",
-            "updated_at" : response.data.updated_at ?? "",
+            "first_name" : response.data.data.first_name ?? "",
+            "last_name" : response.data.data.last_name ?? "",
+            "email" : response.data.data.email ?? "",
+            "currency" : response.data.data.currency ?? "",
+            "amount" : response.data.data.amount ?? 0,
+            "charge" : response.data.data.charge ?? 0,
+            "mode" : response.data.data.mode ?? "",
+            "method" : response.data.data.method ?? "",
+            "type" : response.data.data.type ?? "",
+            "status" : response.data.data.status ?? "",
+            "reference" : response.data.data.reference ?? "",
+            "tReference" : response.data.data.tx_ref ?? "",
+            "created_at" : response.data.data.created_at ?? "",
+            "updated_at" : response.data.data.updated_at ?? "",
         };
-        
+
         const result = await paymentData.verifyPaymentReference(reference);
 
         if(result.affectedRows < 1) return sendErrorResponse(res, 500, "Internal server error!, could not verify the payment!");
 
-        const refrence = await paymentData.getPaymentReference(tReference);
+        const paymentRefrence = await paymentData.getPaymentReference(tReference);
 
         await notificationData.createNotification(
-            refrence.tenant_id,
-            refrence.owner_id,
+            paymentRefrence.tenant_id,
+            paymentRefrence.owner_id,
             notificationTypes.PAYMENT,
             "Payment Received",
-            `Dear User You have received a payment from ${reference.tenant.full_name}
-            for the amount of ${reference.amount} in ${reference.currency}. The transaction reference is 
-            ${reference.reference}. Thank you for using our service!`,
+            `Dear User You have received a payment from ${paymentRefrence.first_name} ${paymentRefrence.last_name}
+            for the amount of ${paymentRefrence.amount} in ${paymentRefrence.currency}. The transaction reference is 
+            ${paymentRefrence.reference}. Thank you for using our service!`,
             getDate()
         );
 

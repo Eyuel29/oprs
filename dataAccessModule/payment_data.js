@@ -60,26 +60,7 @@ const getPaymentReference = async (tReference) => {
     const connection = await pool.getConnection();
     try {
         const [result] = await connection.execute(`
-            SELECT payment_reference.*,
-            JSON_OBJECT(
-                    "user_id", user.user_id,
-                    "full_name", user.full_name,
-                    "gender", user.gender,
-                    "phone_number", user.phone_number,
-                    "age", user.age,
-                    "email", user.email,
-                    "zone", user.zone,
-                    "woreda", user.woreda,
-                    "date_joined", user.date_joined,
-                    "account_status", user.account_status,
-                    "region", user.region,
-                    "job_type", user.job_type,
-                    "married", user.married
-                ) AS tenant
-             FROM payment_reference
-             LEFT JOIN user ON user.user_id = payment_reference.tenant_id 
-             WHERE payment_reference.tx_ref = ?
-            `,[tReference]);
+            SELECT * FROM payment_reference WHERE payment_reference.tx_ref = ?`,[tReference]);
         return result[0];
     } catch (error) {
         console.error("Error creating payment reference:", error);
@@ -120,7 +101,6 @@ const verifyPaymentReference = async (paymentReference) => {
         );
         return result;
     } catch (error) {
-        console.error("Error updating payment reference:", error);
         throw error;
     } finally {
         connection.release();
