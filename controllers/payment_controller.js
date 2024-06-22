@@ -196,8 +196,7 @@ const initialize = async (req, res) =>{
 
 const verifyPayment = async (req, res) =>{
     try {
-        const tReference = req.param.txref;
-        
+        const tReference = req?.params?.txref;
         if (!tReference) return sendErrorResponse(res, 400, "Couldn't verify the payment!");
 
         const response = await axios.get(`https://api.chapa.co/v1/transaction/verify/${tReference}`,
