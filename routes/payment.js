@@ -10,6 +10,6 @@ router.get('/myInfo',verifyUserSession,verifyActive,verifyRoles(ROLES_LIST.LANDL
 router.post('/createSubAccount',verifyUserSession,verifyActive,verifyRoles(ROLES_LIST.LANDLORD),paymentController.createSubAccount);
 router.delete('/deleteSubAccount',verifyUserSession,verifyActive,verifyRoles(ROLES_LIST.LANDLORD),paymentController.deleteSubAccount);
 router.post('/initialize', verifyUserSession,verifyActive,verifyRoles(ROLES_LIST.TENANT),paymentController.initialize);
-router.get('/verify',paymentController.verifyPayment);
+router.get('/verify/:txref',paymentController.verifyPayment);
 
 module.exports = router;
