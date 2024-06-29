@@ -206,8 +206,6 @@ const getMatchingListing = async (searchQuery, page) => {
   }
 };
 
-getMatchingListing("some",1);
-
 const getOwnerListing = async (owner_id) => {
     const connection = await pool.getConnection();
     try {

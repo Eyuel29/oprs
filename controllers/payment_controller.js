@@ -8,7 +8,6 @@ const crypto = require('crypto');
 const instance = require('axios');
 const CSK = process.env.CSK;
 
-
 const axios = instance.create({
     validateStatus: function (status) {return status < 500;}
 });
@@ -208,8 +207,6 @@ const verifyPayment = async (req, res) =>{
             },
         );
 
-        console.log(response.data.data);
-
         const reference = {
             "first_name" : response.data.data.first_name ?? "",
             "last_name" : response.data.data.last_name ?? "",
@@ -238,9 +235,7 @@ const verifyPayment = async (req, res) =>{
             paymentRefrence.owner_id,
             notificationTypes.PAYMENT,
             "Payment Received",
-            `Dear User You have received a payment from ${paymentRefrence.first_name} ${paymentRefrence.last_name}
-            for the amount of ${paymentRefrence.amount} in ${paymentRefrence.currency}. The transaction reference is 
-            ${paymentRefrence.reference}. Thank you for using our service!`,
+            `Dear User You have received a payment from ${paymentRefrence.first_name} ${paymentRefrence.last_name} for the amount of ${paymentRefrence.amount} in ${paymentRefrence.currency} with the charge of ${paymentRefrence.charge} with the total of ${paymentRefrence.amount - paymentRefrence.charge} The transaction reference is ${paymentRefrence.reference}. Thank you for using our service!`,
             getDate()
         );
 

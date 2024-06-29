@@ -50,3 +50,17 @@ INSERT INTO payment_info(sub_account_id,user_id,account_number,business_name,acc
 VALUES('9618cdc3-74db-45d2-888f-5755d079e885',3,'0991109603','Joel Apartments','Eyuel Dejene','853d0598-9c01-41ab-ac99-48eab4da1513','telebirr'),
 ('f1d4ab12-a834-487f-97c6-e9f2e36b373c',5,'0968658459','Ezana Apartments','Ezana Mulgeta','853d0598-9c01-41ab-ac99-48eab4da1513','telebirr'),
 ('a9dbdf67-603e-4b75-bab3-884cca206ee5',7,'1000433229607','Eyuel Guest house','Edris Fereja','96e41186-29ba-4e30-b013-2ca36d7e7025','Commercial Bank of Ethiopia (CBE)');
+
+
+
+
+
+https://checkout.chapa.co/checkout/payment/ozWUtfkUZcKAPMllhdjDcB8y3BG5ol9gVp8Yb2AaJMZrL
+
+
+git add .
+git commit -m"---"
+git push -u origin main
+
+https://checkout.chapa.co/checkout/payment/lfg5ERR2q6oiBbOyXEsij3OSWSCH7krF9pMlaBi5qtDF3
+

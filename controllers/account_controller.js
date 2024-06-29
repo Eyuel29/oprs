@@ -13,22 +13,14 @@ const signout = async (req, res) => {
     
     const cookies = req.cookies;
     if (!cookies?.session_id && !req?.userId) return res.sendStatus(204); //No content
-    
     const cookieSessionId = cookies.session_id;
-
     const result = await sessionData.deleteUserSession(cookieSessionId);
-
-    if (result.affectedRows < 1) {
-        return sendErrorResponse(res, 409, "Unable to logout!");
-    }
-    
+    if (result.affectedRows < 1) return sendErrorResponse(res, 409, "Unable to logout!");
     res.clearCookie('session_id', { httpOnly: true, sameSite: 'None', secure: true });
-    res.status(200).json(
-        {
+    res.status(200).json({
             success: true,
             message: "Logged out successfully!",
-        }
-    );
+    });
 }
 
 const signin = async (req, res) => {
@@ -53,7 +45,9 @@ const signin = async (req, res) => {
         const result = await sessionData.createUserSession(sessionId,userId,userRole,userAgent,origin,createdAt,expiresAt);
         if (result.affectedRows < 1) return sendErrorResponse(res, 409, 'Something went wrong!');
         if (req?.cookies?.session_id) await handleExsistingSession(req?.cookies?.session_id);
-        res.cookie('session_id', sessionId, { httpOnly: true, secure: true, sameSite: 'None', maxAge: (24 * 60 * 60 * 1000) });
+        res.cookie('session_id', sessionId, 
+		{ httpOnly: true, secure: true, sameSite: 'None', maxAge: (24 * 60 * 60 * 1000) }
+	);
 
 
         res.status(200).json({
@@ -97,7 +91,7 @@ const register = async (req, res) => {
 
             const socials = Array.from(req?.body?.socials);
             const married = req?.body?.married ? 1 : 0;
-            const account_status = 1000;
+            const account_status = 2000;
 
             const foundUser = await getUserByEmail(email);
             if (foundUser) return sendErrorResponse(res, 409, 'User already exists with this email!');
