@@ -1,4 +1,4 @@
-const notificationData = require('../dataAccessModule/notification_data');
+const notificationData = require('../data_access_module/notification_data');
 const sendErrorResponse = require('../utils/sendErrorResponse');
 
 const getUserNotifications = async (req, res) => {

@@ -15,9 +15,9 @@ const createVerificationKey = async (userId, key, createdAt, expiresAt) =>{
 const getVerificationKey = async (key) =>{
     const connection = await pool.getConnection();
     try {
-        const [rows] = await connection.execute('SELECT * FROM verification_keys WHERE verification_key = ?;', [key]);
-        connection.release();
-        return rows;
+            const [rows] = await connection.execute('SELECT * FROM verification_keys WHERE verification_key = ?;', [key]);
+            connection.release();
+            return rows;
     } catch (err) {
         throw err;
     }

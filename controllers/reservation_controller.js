@@ -1,7 +1,7 @@
-const reservationData = require('../dataAccessModule/reservation_data');
-const notificationData = require('../dataAccessModule/notification_data');
-const agreementData = require('../dataAccessModule/agreement_data');
-const listingData = require('../dataAccessModule/listing_data');
+const reservationData = require('../data_access_module/reservation_data');
+const notificationData = require('../data_access_module/notification_data');
+const agreementData = require('../data_access_module/agreement_data');
+const listingData = require('../data_access_module/listing_data');
 const sendErrorResponse = require('../utils/sendErrorResponse');
 const {getDate} = require('../utils/date');
 const notificationTypes = require('../config/notification_types');
@@ -66,6 +66,7 @@ const cancelReservation = async (req, res) =>{
         }
         return sendErrorResponse(res,500,"Internal server error, unable to cancel the reservaiton request!");
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res,500,"Internal server error!");
     }
 }
@@ -91,9 +92,6 @@ const approveReservationRequest = async (req, res) =>{
 
         const lease_duration = listing.lease_duration_days;
         const check_in_date = reservation.stay_dates[0] ?? new Date().toISOString();
-
-        console.log("check_in_date : " +check_in_date);
-        console.log("lease_duration : "+lease_duration);
 
         await agreementData.createAgreement(agreement,lease_duration,check_in_date);
         await listingData.setUnAvailable(listing.listing_id);
@@ -142,6 +140,7 @@ const declineReservationRequest = async (req, res) =>{
         });
 
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res,500,"Internal server error!");
     }
 }
@@ -157,6 +156,7 @@ const getReservations = async (req, res) => {
         });
 
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res,500,"Internal server error!");
     }
 }
@@ -193,6 +193,7 @@ const getAgreements = async (req, res) =>{
             body : result
         });
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res,500,"Internal server error!");
     }
 }

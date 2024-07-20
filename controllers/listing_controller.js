@@ -1,5 +1,5 @@
-const listingData = require('../dataAccessModule/listing_data');
-const { handleFileUpload, uploadPhoto, deleteFolder } = require('../dataAccessModule/upload_data');
+const listingData = require('../data_access_module/listing_data');
+const { handleFileUpload, uploadPhoto, deleteFolder } = require('../data_access_module/upload_data');
 const sendErrorResponse = require('../utils/sendErrorResponse');
 const {getDate} = require('../utils/date');
 
@@ -116,6 +116,7 @@ const createListing = async (req, res) =>{
 
           });
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res,500,"Internal server error!");
     }
 }
@@ -123,7 +124,6 @@ const createListing = async (req, res) =>{
 const modifyListing = async (req, res) =>{
     try {
         handleFileUpload(req, res, async (err) => {
-            console.log(req.files);
             if(
                 !req?.params?.id ||
                 !req?.body?.type ||
@@ -231,6 +231,7 @@ const modifyListing = async (req, res) =>{
             try{
                 await deleteFolder(listing_id);
             } catch (error) {
+                console.log(error);
                 return sendErrorResponse(res, 500, "Could not update the files!");
             }
 
@@ -240,6 +241,7 @@ const modifyListing = async (req, res) =>{
                     const fileUrl = await uploadPhoto(file, listing_id);
                     uploadedFiles.push(fileUrl);
                 } catch (error) {
+                    console.log(error);
                     return sendErrorResponse(res, 500, "Could not upload the files!");
                 }
             }
@@ -257,6 +259,7 @@ const modifyListing = async (req, res) =>{
             });
           });
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res,500,"Internal server error!");
     }
 }
@@ -317,6 +320,7 @@ const setAvaliable = async (req, res) =>{
         }
         return sendErrorResponse(res,400,"Unable to update the item!");
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res,500,"Internal server error!");
     }
 } 
@@ -335,6 +339,7 @@ const setUnAvaliable = async (req, res) =>{
         }
         return sendErrorResponse(res,400,"Unable to update the item!");
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res,500,"Internal server error!");
     }
 }

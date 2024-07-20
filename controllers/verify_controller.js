@@ -1,5 +1,5 @@
-const { getVerificationKey, createVerificationKey} = require('../dataAccessModule/verification_data');
-const {changeUserStatus, getUser} =  require('../dataAccessModule/user_data');
+const { getVerificationKey, createVerificationKey} = require('../data_access_module/verification_data');
+const {changeUserStatus, getUser} =  require('../data_access_module/user_data');
 const sendErrorResponse = require('../utils/sendErrorResponse');
 const sendCodeToEmail = require('../utils/emailer');
 const ACTIVE_STATUS = require('../config/verify_status');
@@ -37,6 +37,7 @@ const verify_post = async (req, res)  => {
             return sendErrorResponse (res, 500, 'Internal error try again!');  
         }
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res, 500, 'Internal error please try agin later.');
     }
 }
@@ -59,11 +60,12 @@ const verify_get = async (req, res)  => {
             ""+(new Date().getTime() + 60000 * 5));
 
         return res.status(200).json({
-                success : true,
-                message : 'Verification code sent to ' + email,
+            success : true,
+            message : 'Verification code sent to ' + email,
         });
 
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res, 500, 'Internal server error!');
     }
 

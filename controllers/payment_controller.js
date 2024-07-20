@@ -1,9 +1,9 @@
-const notificationData = require('../dataAccessModule/notification_data');
+const notificationData = require('../data_access_module/notification_data');
 const notificationTypes = require('../config/notification_types');
-const paymentData = require('../dataAccessModule/payment_data');
+const paymentData = require('../data_access_module/payment_data');
 const sendErrorResponse = require('../utils/sendErrorResponse');
 const {getDate} = require('../utils/date');
-const { getUser } = require('../dataAccessModule/user_data');
+const { getUser } = require('../data_access_module/user_data');
 const crypto = require('crypto');
 const instance = require('axios');
 const CSK = process.env.CSK;
@@ -26,6 +26,7 @@ const deleteSubAccount = async (req, res) =>{
             "message" : "Your sub-account has been deleted!"
         });
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(
             res, 
             500, 
@@ -47,6 +48,7 @@ const getPaymentInfo = async (req, res) =>{
             "message" : "Successfully retrieved payment informtion!"
         });
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res, 500, "Internal server error!");
     }
 }
@@ -65,6 +67,7 @@ const getMyPaymentInfo = async (req, res) =>{
             "message" : "Successfully retrieved payment informtion!"
         });
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res, 500, "Internal server error!");
     }
 }
@@ -117,6 +120,7 @@ const createSubAccount = async (req, res) =>{
             "message" : "Sub-account created successfully!"
         });
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res, 500, "Internal server error, Couldn't create the subaccount!");
     }
 }
@@ -173,11 +177,7 @@ const initialize = async (req, res) =>{
            }
         },
     );
-
     await paymentData.createPaymentReference(userId, ownerId, txReference);
-
-    console.log(response.data.data);
-
     res.status(200).json({ 
         "success" : true,
         "body" : {

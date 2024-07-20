@@ -56,6 +56,21 @@ const uploadUserPhoto = async (file, destinationPath) => {
 };
 
 
+const uploadBackupData = async (file, path) => {
+  try {
+    const uniqueSuffix = Date.now() + '-' + crypto.randomBytes(8).toString('hex');
+    const folderRefrence = ref(storage, `backup-${path}`);
+    const fileName = file.fieldname + '-' + uniqueSuffix + file.originalname;
+    const fileRefrence = ref(folderRefrence, fileName);
+    const uploadResult = await uploadBytes(fileRefrence,file.buffer);
+    const dl = await getDownloadURL(uploadResult.ref)
+    return dl;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
 const deleteUserFolder = async (folderPath) => {
   try {
     const r = ref(storage, `user-${folderPath}`);
@@ -80,4 +95,11 @@ const deleteFolder = async (folderPath) => {
 };
 
 
-module.exports = { handleFileUpload, uploadPhoto,uploadUserPhoto,deleteFolder,deleteUserFolder};
+module.exports = { 
+  handleFileUpload, 
+  uploadPhoto,
+  uploadUserPhoto,
+  uploadBackupData,
+  deleteFolder,
+  deleteUserFolder
+};

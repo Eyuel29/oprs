@@ -1,6 +1,6 @@
 const {getDate} = require('../utils/date');
-const reviewData = require('../dataAccessModule/review_data');
-const { getUser } = require('../dataAccessModule/user_data');
+const reviewData = require('../data_access_module/review_data');
+const { getUser } = require('../data_access_module/user_data');
 const sendErrorResponse = require('../utils/sendErrorResponse');
 
 const deleteReview = async (req, res) => {
@@ -19,6 +19,7 @@ const deleteReview = async (req, res) => {
         });
 
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res,500,"Internal server error!");
     }
 }
@@ -38,6 +39,7 @@ const getUserReviews = async (req, res) => {
             body: reviewResult
         });
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res,500,"Internal server error!");
     }
 }
@@ -54,6 +56,7 @@ const getMyReviews = async (req, res) => {
             body: reviewResult
         });
     } catch (error) {
+        console.log(error);
         return sendErrorResponse(res,500,"Internal server error!");
     }
 }

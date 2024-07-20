@@ -1,4 +1,4 @@
-const userData = require("../dataAccessModule/user_data");
+const userData = require("../data_access_module/user_data");
 const sendErrorResponse = require("../utils/sendErrorResponse");
 const ACCOUNT_STATUS = require("../config/verify_status");
 
@@ -18,6 +18,7 @@ const removeUser = async (req, res) => {
     }
     return sendErrorResponse(res, 409, "Unable to remove user");
   } catch (error) {
+    console.log(error);
     return sendErrorResponse(res, 500, "Internal server error!");
   }
 };
@@ -35,7 +36,9 @@ const getAllUsers = async (req, res) => {
         message: `successfully loaded page ${page} users!`,
         body: result,
     });
+
   } catch (error) {
+    console.log(error);
     return sendErrorResponse(res, 500, "Internal server error!");
   }
 };
@@ -62,6 +65,7 @@ const getUser = async (req, res) => {
       });
     }
   } catch (error) {
+    console.log(error);
     return sendErrorResponse(res, 500, "Internal server error!");
   }
 };
@@ -88,6 +92,7 @@ const suspendUser = async (req, res) => {
       });
     }
   } catch (error) {
+    console.log(error);
     return sendErrorResponse(res, 500, "Internal server error!");
   }
 };
@@ -115,6 +120,7 @@ const activateUser = async (req, res) => {
       });
     }
   } catch (error) {
+    console.log(error);
     return sendErrorResponse(res, 500, "Internal server error!");
   }
 };

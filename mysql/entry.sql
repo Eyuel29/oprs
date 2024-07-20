@@ -1,19 +1,19 @@
 INSERT INTO user(full_name, gender,phone_number,email,zone,woreda,job_type,region,age,account_status,married, user_role)VALUES
-('Eyuel Dejene','male',251958031425,'fnmnqxnsdh@gmail.com','KOLFE KERANIO','01','Account','Addis Ababa',30,3000,false, 3000),
-('Abebe Kebede','male',251906212658,'xyusnzlcot@gmail.com','BOLE','01','Account','Addis Ababa',30,3000,false, 1000),
-('Eyuel Dejene','male',251986725521,'dejenejoel@gmail.com','GULELE','01','Account','Addis Ababa',30,3000,false, 2000),
-('Muluken Mengistu','male',251974207517,'rggvztqjty@gmail.com','ARADA','01','Account','Addis Ababa',30,3000,false, 1000),
-('Melkam Mickiael','female',251933505531,'zhjwiyqwtl@gmail.com','KOLFE KERANIO','01','Account','Addis Ababa',30,3000,false, 2000),
-('Ezana Mulgeta','male',251924544077,'dmlstactar@gmail.com','KOLFE KERANIO','01','Account','Addis Ababa',30,3000,false, 3000),
-('Foziya Abdella','female',251918206188,'wtzyljwkbw@gmail.com','KIRKOS','01','Account','Addis Ababa',30,3000,false, 2000),
-('Admasu Biruk','male',251917237771,'kvouhvmwjd@gmail.com','ADDIS KETEMA','01','Account','Addis Ababa',30,3000,false, 1000),
-('Edris Fereja','male',251946733317,'ilpjhsxrtb@gmail.com','ARADA','01','Account','Addis Ababa',30,3000,false, 2000),
-('Anteneh Girma','male',251917873802,'jagtdlhrwb@gmail.com','ADDIS KETEMA','01','Account','Addis Ababa',30,3000,false, 1000);
+('Eyuel Dejene','male',0958031425,'fnmnqxnsdh@gmail.com','KOLFE KERANIO','01','Account','Addis Ababa',30,3000,false, 3000),
+('Abebe Kebede','male',0906212658,'xyusnzlcot@gmail.com','BOLE','01','Account','Addis Ababa',30,3000,false, 1000),
+('Eyuel Dejene','male',0986725521,'dejenejoel@gmail.com','GULELE','01','Account','Addis Ababa',30,3000,false, 2000),
+('Muluken Mengistu','male',0974207517,'rggvztqjty@gmail.com','ARADA','01','Account','Addis Ababa',30,3000,false, 1000),
+('Melkam Mickiael','female',0933505531,'zhjwiyqwtl@gmail.com','KOLFE KERANIO','01','Account','Addis Ababa',30,3000,false, 2000),
+('Ezana Mulgeta','male',0924544077,'dmlstactar@gmail.com','KOLFE KERANIO','01','Account','Addis Ababa',30,3000,false, 3000),
+('Foziya Abdella','female',0918206188,'wtzyljwkbw@gmail.com','KIRKOS','01','Account','Addis Ababa',30,3000,false, 2000),
+('Admasu Biruk','male',0917237771,'kvouhvmwjd@gmail.com','ADDIS KETEMA','01','Account','Addis Ababa',30,3000,false, 1000),
+('Edris Fereja','male',0946733317,'ilpjhsxrtb@gmail.com','ARADA','01','Account','Addis Ababa',30,3000,false, 2000),
+('Anteneh Girma','male',0917873802,'jagtdlhrwb@gmail.com','ADDIS KETEMA','01','Account','Addis Ababa',30,3000,false, 1000);
 
 INSERT INTO passwords(user_id, pass) VALUES
 (1 ,'usxbmnly'),
 (2 ,'nneuvmlf'),
-(3 ,'aywdnldt'),
+(3 ,'aywdnldt'), 
 (4 ,'cwumjhea'),
 (5 ,'hfhhtgsx'),
 (6 ,'qmjksifv'),
@@ -51,16 +51,10 @@ VALUES('9618cdc3-74db-45d2-888f-5755d079e885',3,'0991109603','Joel Apartments','
 ('f1d4ab12-a834-487f-97c6-e9f2e36b373c',5,'0968658459','Ezana Apartments','Ezana Mulgeta','853d0598-9c01-41ab-ac99-48eab4da1513','telebirr'),
 ('a9dbdf67-603e-4b75-bab3-884cca206ee5',7,'1000433229607','Eyuel Guest house','Edris Fereja','96e41186-29ba-4e30-b013-2ca36d7e7025','Commercial Bank of Ethiopia (CBE)');
 
-
-
-
-
 https://checkout.chapa.co/checkout/payment/ozWUtfkUZcKAPMllhdjDcB8y3BG5ol9gVp8Yb2AaJMZrL
-
 
 git add .
 git commit -m"---"
 git push -u origin main
 
 https://checkout.chapa.co/checkout/payment/lfg5ERR2q6oiBbOyXEsij3OSWSCH7krF9pMlaBi5qtDF3
-

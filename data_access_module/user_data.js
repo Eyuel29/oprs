@@ -7,12 +7,24 @@ const createUser = async (user,contactInfo,photoUrl) =>{
     try {
     const {
         full_name,gender,phone_number,email,
-        zone,woreda,job_type,age,married,
+        zone,woreda,job_type,date_of_birth,married,
         account_status,region,user_role} = user;
 
         const [result] = await connection.execute(
-            `INSERT INTO user(full_name,gender,phone_number,email,zone,woreda,job_type,age,account_status,region,married,user_role) VALUES(?,?,?,?,?,?,?,?,?,?,?,?);`,
-        [full_name,gender,phone_number,email,zone,woreda,job_type,age,account_status,region,married,user_role]);
+           `INSERT INTO user(
+            full_name,
+            gender,
+            phone_number,
+            email,
+            zone,
+            woreda,
+            job_type,
+            date_of_birth,
+            account_status,
+            region,
+            married,
+            user_role) VALUES(?,?,?,?,?,?,?,?,?,?,?,?);`,
+        [full_name,gender,phone_number,email,zone,woreda,job_type,date_of_birth,account_status,region,married,user_role]);
 
         const placeholders = contactInfo.map(() => '(?, ?)').join(',');
         const values = contactInfo.reduce((acc, contact) => {
@@ -49,6 +61,7 @@ const addcontactInfo = async (user_id, contactInfo) => {
   
       const query = `INSERT INTO contact_info (user_id, contact_name, contact_address) VALUES ${placeholders}`;
       const [rows] = await connection.execute(query, values);
+
       return rows;
     } catch (err) {
       throw err;
@@ -71,38 +84,28 @@ const createUserAuth = async (userId, authString) =>{
     }
 }
 
-const registerUser  = async (userId, authString) =>{
-    const connection = await pool.getConnection();
-    try {
-        const [result] = await connection.execute('INSERT INTO user(user_id, user_auth) VALUES(?, ?);',
-        [userId, authString]);
-        return result;
-    } catch (error) {
-        throw error;
-    }finally{
-        connection.release();
-    }
-}
 
 const getUser = async (userId) =>{
     const connection = await pool.getConnection();
     try {
         const [rows] = await connection.execute(`SELECT 
-    user.*,
-    COALESCE(
-        (SELECT user_photos.url 
-         FROM user_photos 
-         WHERE user.user_id = user_photos.user_id 
-         LIMIT 1), 
-        '') AS photo_url,
-    COALESCE(
-        JSON_ARRAYAGG(
-            JSON_OBJECT(
-                'contact_name', contact_info.contact_name, 
-                'contact_address', contact_info.contact_address
-            )), JSON_ARRAY()) AS contact_infos 
-FROM user LEFT JOIN contact_info ON user.user_id = contact_info.user_id 
-WHERE user.user_id = ? GROUP BY user.user_id;`, [userId]);
+        user.*,
+        COALESCE(( 
+            SELECT user_photos.url 
+            FROM user_photos 
+            WHERE user.user_id = user_photos.user_id 
+            LIMIT 1 
+        ),'') AS photo_url,
+        COALESCE(
+            JSON_ARRAYAGG(
+                JSON_OBJECT(
+                    'contact_name', contact_info.contact_name, 
+                    'contact_address', contact_info.contact_address
+                )
+            ), JSON_ARRAY()
+        ) AS contact_infos 
+        FROM user LEFT JOIN contact_info ON user.user_id = contact_info.user_id 
+        WHERE user.user_id = ? GROUP BY user.user_id;`, [userId]);
         return rows[0];
     } catch (err) {
         throw err;
@@ -115,37 +118,21 @@ const getUserByEmail = async (email) =>{
     const connection = await pool.getConnection();
     try {
         const [rows] = await connection.execute(`SELECT 
-    user.*,
-    COALESCE(
+        user.*,
+        COALESCE(
         (SELECT user_photos.url 
-         FROM user_photos 
-         WHERE user.user_id = user_photos.user_id 
-         LIMIT 1), 
+            FROM user_photos 
+            WHERE user.user_id = user_photos.user_id 
+            LIMIT 1), 
         '') AS photo_url,
-    COALESCE(
-        (SELECT user_auth.auth_string 
-         FROM user_auth 
-         WHERE user.user_id = user_auth.user_id 
-         LIMIT 1), 
-        '') AS auth_string,
-    COALESCE(
+        COALESCE(
         JSON_ARRAYAGG(
             JSON_OBJECT(
                 'contact_name', contact_info.contact_name, 
                 'contact_address', contact_info.contact_address
-            )
-        ), 
-        JSON_ARRAY()
-    ) AS contact_infos 
-FROM 
-    user 
-LEFT JOIN 
-    contact_info ON user.user_id = contact_info.user_id 
-WHERE 
-    user.email = ? 
-GROUP BY 
-    user.user_id;`, 
-            [email]);
+            )), JSON_ARRAY()) AS contact_infos 
+        FROM user LEFT JOIN contact_info ON user.user_id = contact_info.user_id 
+        WHERE user.email = ? GROUP BY user.user_id;`, [email]);
         return rows[0];
     } catch (err) {
         throw err;
@@ -209,6 +196,18 @@ const changeUserStatus = async (userId, status) =>{
     }
 }
 
+const changeUserAuthString = async (userId, auth_string) =>{
+    const connection = await pool.getConnection();
+    try {
+        const [rows] = await connection.execute(`UPDATE user_auth SET auth_string = ? WHERE user_id = ?;`, [auth_string ,userId]);
+        return rows;
+    } catch (err) {
+        throw err;
+    }finally{
+        connection.release();
+    }
+}
+
 const getUserStatus = async (userId) =>{
     const connection = await pool.getConnection();
     try {
@@ -241,8 +240,8 @@ module.exports = {
     getUser,
     getUserByEmail,
     getAllUsers,
-    registerUser,
     updateUser,
     deleteUser,
+    changeUserAuthString,
     addcontactInfo
 };

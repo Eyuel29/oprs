@@ -1,4 +1,4 @@
-const {getUserStatus} = require('../dataAccessModule/user_data');
+const {getUserStatus} = require('../data_access_module/user_data');
 const sendErrorResponse = require('../utils/sendErrorResponse');
 
 const verifyActive = async (req, res, next) => {
