@@ -120,6 +120,12 @@ const getUserByEmail = async (email) =>{
         const [rows] = await connection.execute(`SELECT 
         user.*,
         COALESCE(
+        (SELECT user_auth.auth_string 
+            FROM user_auth 
+            WHERE user.user_id = user_auth.user_id 
+            LIMIT 1), 
+        '') AS auth_string,
+        COALESCE(
         (SELECT user_photos.url 
             FROM user_photos 
             WHERE user.user_id = user_photos.user_id 
