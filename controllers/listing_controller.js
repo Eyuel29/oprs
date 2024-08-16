@@ -91,8 +91,6 @@ const createListing = async (req, res) =>{
 
             const listing_id = listing_Result.insertId;
 
-
-
             const uploadedFiles = [];   
             for (const file of req?.files) {
                 try{

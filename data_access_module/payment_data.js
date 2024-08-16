@@ -63,7 +63,18 @@ const getPaymentReference = async (tReference) => {
             SELECT * FROM payment_reference WHERE payment_reference.tx_ref = ?`,[tReference]);
         return result[0];
     } catch (error) {
-        console.error("Error creating payment reference:", error);
+        throw error;
+    } finally {
+        connection.release();
+    }
+}
+
+const getAllPaymentReferences = async () => {
+    const connection = await pool.getConnection();
+    try {
+        const [result] = await connection.execute(`SELECT * FROM payment_reference;`);
+        return result;
+    } catch (error) {
         throw error;
     } finally {
         connection.release();
@@ -114,5 +125,6 @@ module.exports = {
     createSubAccount,
     deleteSubAccount,
     getPaymentInfo,
-    getPaymentReference
+    getPaymentReference,
+    getAllPaymentReferences
 };

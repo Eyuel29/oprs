@@ -157,7 +157,6 @@ const getReservation = async (owner_id, reservation_id) => {
     }
 }
 
-
 const getRequest = async (tenant_id, reservation_id) =>{
     const connection = await pool.getConnection();
     try {

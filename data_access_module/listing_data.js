@@ -168,6 +168,7 @@ const getAllListings = async () => {
         (SELECT COUNT(*) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS review_count,
         (SELECT FLOOR(AVG(rating)) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS average_rating,
         (SELECT JSON_ARRAYAGG(describing_terms.term) FROM describing_terms WHERE describing_terms.listing_id = listing.listing_id) AS describing_terms,
+        (SELECT user.full_name FROM user WHERE user.user_id = listing.owner_id) AS owner,
         (SELECT JSON_ARRAYAGG(listing_photos.url) FROM listing_photos WHERE listing_photos.listing_id = listing.listing_id) AS photo_urls FROM listing;`;
 
     const [rows] = await connection.execute(selectionQuery);

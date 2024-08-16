@@ -95,6 +95,9 @@ const getAgreements = async (user_id) =>{
                   "region", owner_user.region,
                   "job_type", owner_user.job_type,
                   "married", owner_user.married,
+                  "id_photo_url", tenant_user.id_photo_url,
+                  "id_type", tenant_user.id_type,
+                  "id_number", tenant_user.id_number,
                   "url", COALESCE(owner_photos.url, '')
               ) AS owner
           FROM agreement

@@ -39,7 +39,6 @@ const uploadPhoto = async (file, destinationPath) => {
   }
 };
 
-
 const uploadUserPhoto = async (file, destinationPath) => {
   try {
     const uniqueSuffix = Date.now() + '-' + crypto.randomBytes(8).toString('hex');
@@ -47,6 +46,20 @@ const uploadUserPhoto = async (file, destinationPath) => {
     const fileName = file.fieldname + '-' + uniqueSuffix + file.originalname;
     const fileRefrence = ref(folderRefrence, fileName);
 
+    const uploadResult = await uploadBytes(fileRefrence,file.buffer);
+    const dl = await getDownloadURL(uploadResult.ref)
+    return dl;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const uploadUserIdPhoto = async (file, destinationPath) => {
+  try {
+    const uniqueSuffix = Date.now() + '-' + crypto.randomBytes(8).toString('hex');
+    const folderRefrence = ref(storage, `user-identification-photo${destinationPath}`);
+    const fileName = file.fieldname + '-' + uniqueSuffix + file.originalname;
+    const fileRefrence = ref(folderRefrence, fileName);
     const uploadResult = await uploadBytes(fileRefrence,file.buffer);
     const dl = await getDownloadURL(uploadResult.ref)
     return dl;
@@ -99,6 +112,7 @@ module.exports = {
   handleFileUpload, 
   uploadPhoto,
   uploadUserPhoto,
+  uploadUserIdPhoto,
   uploadBackupData,
   deleteFolder,
   deleteUserFolder

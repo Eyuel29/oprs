@@ -14,7 +14,6 @@ const verifyActive = require('./middlewares/verify_active');
 const requestCache = require('./config/log_cache_config');
 const statusMonitor = require('express-status-monitor');
 
-
 app.use(express.static('public'));
 app.use(ejsLayouts);
 app.use(statusMonitor()); 
@@ -33,7 +32,6 @@ const notification = require('./routes/notification');
 const payment = require('./routes/payment');
 const PORT = process.env.PORT || 4000;
 
-
 app.use(logger);
 const morganMw = morgan('combined', {
 stream: {
@@ -47,7 +45,6 @@ stream: {
     },
   },
 });
-
 
 // app.use(credentials);
 // app.use(cors(corsOptions));

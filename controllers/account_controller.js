@@ -190,7 +190,9 @@ const handleExsistingSession  = async (sessionId) =>{
 
 const register = async (req, res) => {
     try{
-        handleFileUpload(req, res, async (err) => {
+        handleFileUpload(req, res, async (err) => {            
+            const profileImage = Array.from(req?.files ?? []).find((e) => e.originalname == "user_profile_image");
+            const idImage = Array.from(req?.files ?? []).find((e) => e.originalname == "user_id_image");
             if (    
                 !req?.body?.full_name ||
                 !req?.body?.gender ||
@@ -202,29 +204,25 @@ const register = async (req, res) => {
                 !req?.body?.job_type ||
                 !req?.body?.user_role ||
                 !req?.body?.region ||
-                !req?.body?.id_photo_url ||
                 !req?.body?.id_type ||
                 !req?.body?.id_number ||
                 !req?.body?.password || 
-                req?.id_photo.length < 1 
+                !idImage
             ) {
-                return sendErrorResponse(res, 400, 'Please provide the required information!');             
+                return sendErrorResponse(res, 400, 'Please provide the required information!');
             }
-
+            if (req?.body?.user_role == 3000 || (req?.body?.user_role != 1000 && req?.body?.user_role != 2000)) return sendErrorResponse(res, 403, "Forbidden");
             const { full_name,date_of_birth,gender,phone_number,email,zone,woreda,job_type, id_type, id_number, region,password,user_role } = req?.body;
-            const socials = Array.from(req?.body?.socials);
             const married = req?.body?.married ? 1 : 0;
             const account_status = 2000;
-
             const foundUser = await getUserByEmail(email);
             if (foundUser) return sendErrorResponse(res, 409, 'User already exists with this email!');
-	    
             var uploaded_file;
             if(err) return sendErrorResponse(res, 400, "Photos Only jpeg | png type & upto 1 MB is allowed!");
 
-            if (req?.files.length > 0) {
-                try{
-                    uploaded_file = await uploadPhoto(req?.files[0]);
+            if (profileImage) {
+                try{		
+                    uploaded_file = await uploadPhoto(profileImage);
                 } catch (error) {
                     console.log(error);
                     return sendErrorResponse(res, 500, "Internal server error! Couldn't upload the file!");    
@@ -233,9 +231,9 @@ const register = async (req, res) => {
             }
 
             var id_photo_url;
-            if (req?.id_photo.length > 0) {
+            if (idImage) {
                 try{
-                    id_photo_url = await uploadPhoto(req?.id_photo[0]);
+                    id_photo_url = await uploadPhoto(idImage);
                 } catch (error) {
                     console.log(error);
                     return sendErrorResponse(res, 500, "Internal server error! Couldn't upload the file!");    
@@ -247,14 +245,13 @@ const register = async (req, res) => {
                 full_name,gender,phone_number,email,zone,user_role,woreda,job_type,
                 id_photo_url, id_type, id_number, uploaded_file, date_of_birth, account_status,region,married 
               }, 
-              socials, 
+              [], 
               uploaded_file
             );
 
             if (userRegRes.affectedRows < 1) return sendErrorResponse(res, 500, 'Something went wrong!');
 	        const new_user_id = userRegRes.insertId;
-            if (socials && socials.length > 0) await userData.addSocials(new_user_id, req?.socials);
-
+            
             bcrypt.hash(password, 8, async (err, hash) => {
                 const auth_string = hash;
                 const userAuthRes = await userData.createUserAuth(new_user_id, auth_string, user_role);

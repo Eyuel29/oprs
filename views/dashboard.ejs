@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Property Listings</title>
     <link rel="stylesheet" href="/dashboard.css">
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -45,10 +45,7 @@
                 XLSX.writeFile(workbook, filename);
             }
 
-            exportButton.addEventListener('click', () => {
-                exportTableToExcel('property_listings.xlsx');
-            });
-
+            exportButton.addEventListener('click', () => exportTableToExcel(`${changeReportType.value}_report.xlsx`));
             fetchListings();
         });
 
@@ -93,14 +90,14 @@
                         <td>${user.zone}</td>
                         <td>${user.woreda}</td>
                         <td>${new Date(user.date_joined).toLocaleString()}</td>
-                        <td>${user.account_status}</td>
+                        <td>${user.account_status == 1000 ? "Suspended" : user.user_role == 2000 ? "Not Verified" : "Verified"}</td>
                         <td>${user.married ? "Yes" : "No"}</td>
                     </tr>`;
                 });
+
                 table += '</table>';
                 document.getElementById('listings-container').innerHTML = table;
             });
-
         })
         .catch((error) => {
             alert("Failed to fetch Users!")
@@ -119,29 +116,20 @@
                 <tr>
                     <th>ID</th>
                     <th>Owner ID</th>
+                    <th>Owner</th>
                     <th>Type</th>
                     <th>Title</th>
                     <th>Description</th>
                     <th>Sub City</th>
                     <th>Woreda</th>
                     <th>Area Name</th>
-                    <th>Latitude</th>
-                    <th>Longitude</th>
                     <th>Price</th>
                     <th>Currency</th>
-                    <th>Tax Responsibility</th>
-                    <th>Building Name</th>
-                    <th>Date Created</th>
-                    <th>Furnished</th>
                     <th>Total Area (m²)</th>
                     <th>Status</th>
                     <th>Views</th>
-                    <th>Storage Capacity (m²)</th>
                     <th>Parking Capacity</th>
-                    <th>Ceiling Height (m)</th>
                     <th>Number of Floors</th>
-                    <th>Loading Docks</th>
-                    <th>Guest Capacity</th>
                     <th>Created At</th>
                     <th>Updated At</th>
                 </tr>`;
@@ -150,29 +138,20 @@
                     table += `<tr>
                     <td>${listing.listing_id}</td>
                     <td>${listing.owner_id}</td>
+                    <td>${listing.owner}</td>
                     <td>${listing.type}</td>
                     <td>${listing.title}</td>
                     <td>${listing.description}</td>
                     <td>${listing.sub_city}</td>
                     <td>${listing.woreda}</td>
                     <td>${listing.area_name}</td>
-                    <td>${listing.latitude}</td>
-                    <td>${listing.longitude}</td>
                     <td>${listing.price_per_duration}</td>
                     <td>${listing.payment_currency}</td>
-                    <td>${listing.tax_responsibility}</td>
-                    <td>${listing.building_name}</td>
-                    <td>${listing.date_created}</td>
-                    <td>${listing.furnished}</td>
                     <td>${listing.total_area_square_meter}</td>
-                    <td>${listing.listing_status}</td>
+                    <td>${listing.listing_status == 1000 ? "Not Available" : "Available"}</td>
                     <td>${listing.views}</td>
-                    <td>${listing.storage_capacity_square_meter}</td>
                     <td>${listing.parking_capacity}</td>
-                    <td>${listing.ceiling_height_in_meter}</td>
                     <td>${listing.number_of_floors}</td>
-                    <td>${listing.loading_docks}</td>
-                    <td>${listing.guest_capacity}</td>
                     <td>${new Date(listing.created_at).toLocaleString()}</td>
                     <td>${new Date(listing.updated_at).toLocaleString()}</td>
                 </tr>`;
@@ -195,7 +174,6 @@
                 return res.json();
             })
             .then((data) => {
-
                 let table = '<table border="1">';
                 table += `
                 <tr>
@@ -212,7 +190,6 @@
                     <th>Created At</th>
                     <th>Updated At</th>
                 </tr>`;
-
                 if (data.length < 1) {
                     table += `<tr><td colspan="12">No Data</td></tr>`;
                 } else {
@@ -244,50 +221,64 @@
         }
 
         function fetchPaymentReferences() {
-            fetch('/reservation/reservationReport', {
+            fetch('/payment/getAllReferences', {
                 headers: {"Content-Type": 'application/json'},
                 method: 'GET'
             })
             .then((res) => {
-                return res.json();
+                console.log(res);
+                return res.json()
             })
             .then((data) => {
-
                 let table = '<table border="1">';
                 table += `
                 <tr>
-                    <th>Reservation ID</th>
-                    <th>Owner ID</th>
-                    <th>Tenant Full Name</th>
-                    <th>Tenant Phone Number</th>
-                    <th>Listing Title</th>
-                    <th>Description</th>
-                    <th>Lease Duration (days)</th>
-                    <th>Price Offer</th>
-                    <th>Selected Payment Method</th>
+                    <th>Id</th>
+                    <th>Tenant ID</th>
+                    <th>owner ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Currency</th>
+                    <th>Amount</th>
+                    <th>Charge</th>
+                    <th>Mode</th>
+                    <th>Method</th>
+                    <th>Type</th>
                     <th>Status</th>
+                    <th>Transaction ref</th>
+                    <th>reference</th>
+                    <th>title</th>
+                    <th>Description</th>
                     <th>Created At</th>
                     <th>Updated At</th>
                 </tr>`;
 
                 if (data.length < 1) {
-                    table += `<tr><td colspan="12">No Data</td></tr>`;
+                    table += `<tr><td colspan="19">No Data</td></tr>`;
                 } else {
-                    data.forEach(reservation => {
+                    data.forEach(payment => {
                         table += `
                         <tr>
-                            <td>${reservation.reservation_id}</td>
-                            <td>${reservation.owner_id}</td>
-                            <td>${reservation.tenant.full_name}</td>
-                            <td>${reservation.tenant.phone_number}</td>
-                            <td>${reservation.listing_title}</td>
-                            <td>${reservation.description}</td>
-                            <td>${reservation.lease_duration_days}</td>
-                            <td>${reservation.price_offer}</td>
-                            <td>${reservation.selected_payment_method}</td>
-                            <td>${reservation.status}</td>
-                            <td>${new Date(reservation.created_at).toLocaleString()}</td>
-                            <td>${new Date(reservation.updated_at).toLocaleString()}</td>
+                            <td>${payment.id}</td>
+                            <td>${payment.tenant_id}</td>
+                            <td>${payment.owner_id}</td>
+                            <td>${payment.first_name}</td>
+                            <td>${payment.last_name}</td>
+                            <td>${payment.email}</td>
+                            <td>${payment.currency}</td>
+                            <td>${payment.amount}</td>
+                            <td>${payment.charge}</td>
+                            <td>${payment.mode}</td>
+                            <td>${payment.method}</td>
+                            <td>${payment.type}</td>
+                            <td>${payment.status}</td>
+                            <td>${payment.tx_ref}</td>
+                            <td>${payment.reference}</td>
+                            <td>${payment.title}</td>
+                            <td>${payment.description}</td>
+                            <td>${payment.created_at}</td>
+                            <td>${payment.updated_at}</td>
                         </tr>`;
                     });
                 }
@@ -296,7 +287,7 @@
             })
             .catch((error) => {
                 console.log(error);
-                alert("Failed to fetch reservations!")
+                alert("Failed to fetch payment references!")
             });
         }
     </script>

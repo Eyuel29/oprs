@@ -26,6 +26,7 @@ router.use('/signout',verifyAdminSession,verifyRoles(ROLES_LIST.ADMIN), (req, re
 
 router.use('/metrics', verifyAdminSession,verifyRoles(ROLES_LIST.ADMIN), (req, res) => res.render('metrics-view'));
 router.use('/users', verifyAdminSession,verifyRoles(ROLES_LIST.ADMIN), (req, res) => res.render('user-view'));
+router.use('/listings', verifyAdminSession,verifyRoles(ROLES_LIST.ADMIN), (req, res) => res.render('listing-view'));
 router.use('/log', verifyAdminSession,verifyRoles(ROLES_LIST.ADMIN), (req, res) => res.render('log-view'));
 router.use('/backup', verifyAdminSession,verifyRoles(ROLES_LIST.ADMIN), (req, res) => res.render('backup-view'));
 router.use('/payments', verifyAdminSession,verifyRoles(ROLES_LIST.ADMIN), (req, res) => res.render('payment-refrence-view'));

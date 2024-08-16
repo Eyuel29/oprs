@@ -13,7 +13,6 @@ router.post('/request',verifyUserSession, verifyRoles(ROLES_LIST.TENANT),reserva
 router.get('/agreements/:id',verifyUserSession, verifyRoles(ROLES_LIST.TENANT, ROLES_LIST.LANDLORD),reservationController.getAgreements);
 router.get('/reservationReport',verifyUserSession, verifyRoles(ROLES_LIST.ADMIN), async (req, res) =>{
     const data = await getReservationsReports();
-    console.log(data);
     res.status(200).json(data);
 });
 router.delete('/cancel/:id',verifyUserSession, verifyRoles(ROLES_LIST.TENANT),reservationController.cancelReservation);
