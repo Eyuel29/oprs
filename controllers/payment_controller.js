@@ -102,6 +102,9 @@ const createSubAccount = async (req, res) =>{
             },
         );
 
+        console.log(response);
+        
+
         const sub_account_id = response.data.data["subaccounts[id]"];
 
         const result = await paymentData.createSubAccount(

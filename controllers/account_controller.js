@@ -103,6 +103,8 @@ const restoreAccountVerify = async (req, res) =>{
         return sendErrorResponse(res, 400, `Keys don't match!`);
     }
 
+    const sessionId = crypto.randomBytes(64).toString('hex');
+
     res.cookie('session_id', sessionId, { 
         httpOnly: true, 
         secure: true, 
@@ -219,7 +221,6 @@ const register = async (req, res) => {
             if (foundUser) return sendErrorResponse(res, 409, 'User already exists with this email!');
             var uploaded_file;
             if(err) return sendErrorResponse(res, 400, "Photos Only jpeg | png type & upto 1 MB is allowed!");
-
             if (profileImage) {
                 try{		
                     uploaded_file = await uploadPhoto(profileImage);
@@ -345,8 +346,11 @@ const modifyProfile = async (req, res) => {
                     return sendErrorResponse(res, 500, "Internal server error! Couldn't upload the file!");    
                 }   
                 if (!uploaded_file) return sendErrorResponse(res, 500, "Internal server error! Couldn't upload the file!");
+                
             }
 
+            const m = married === "Married" ? 1 : 0;
+            
             const userRegRes = await userData.updateUser(
                 userId ,{ 
                     full_name,
@@ -356,8 +360,9 @@ const modifyProfile = async (req, res) => {
                     job_type,
                     date_of_birth,
                     region,
-                    "married" : (married ? 1 : 0)
-                }
+                    "married" : m
+                },
+                uploaded_file
             );
 
             if (userRegRes.affectedRows < 1) return sendErrorResponse(res, 500, 'Something went wrong!');

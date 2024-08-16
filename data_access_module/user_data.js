@@ -8,7 +8,7 @@ const createUser = async (user,contactInfo,photoUrl) =>{
     const {
         full_name,gender,phone_number,email,
         zone,woreda,job_type,id_type,id_number,id_photo_url,date_of_birth,married,
-        account_status,region,user_role} = user;
+        account_status,region,user_role,citizenship} = user;
 
         const [result] = await connection.execute(
            `INSERT INTO user(
@@ -26,8 +26,9 @@ const createUser = async (user,contactInfo,photoUrl) =>{
             account_status,
             region,
             married,
-            user_role) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`,
-        [full_name,gender,phone_number,email,zone,woreda,job_type,id_type,id_number,id_photo_url,date_of_birth,account_status,region,married,user_role]);
+            user_role,
+            citizenship	) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`,
+        [full_name,gender,phone_number,email,zone,woreda,job_type,id_type,id_number,id_photo_url,date_of_birth,account_status,region,married,user_role, citizenship]);
 
         const placeholders = contactInfo.map(() => '(?, ?)').join(',');
         const values = contactInfo.reduce((acc, contact) => {
@@ -173,14 +174,19 @@ const getAllUsers = async () =>{
     }
 }
 
-const updateUser = async (userId, userData) => {
+const updateUser = async (userId, userData, photoUrl) => {
     const connection = await pool.getConnection();
     try {
         const setClause = Object.keys(userData).map(key => `${key} = ?`).join(', ');
         const values = Object.values(userData);
         values.push(userId);   
         const query = `UPDATE user SET ${setClause} WHERE user_id = ?;`;
+        console.log(values);
+        
         const [rows] = await connection.execute(query, values);
+        if (photoUrl) {
+            await connection.execute(`UPDATE user_photos SET url = ? WHERE user_id = ?;`,[photoUrl, userId]);
+        }
         return rows;
     } catch (err) {
         throw err;
