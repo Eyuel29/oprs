@@ -14,6 +14,10 @@ CREATE TABLE user(
 	account_status INTEGER DEFAULT 2000,
 	region VARCHAR(64) NOT NULL,
     job_type VARCHAR(64) NOT NULL,
+    id_type VARCHAR(64) NOT NULL,
+    id_number VARCHAR(64) NOT NULL,
+    citizenship VARCHAR(64) NOT NULL,
+    id_photo_url TEXT NOT NULL,
     user_role INTEGER DEFAULT 1000,
 	married BOOL NOT NULL
 );
@@ -44,7 +48,7 @@ CREATE TABLE verification_keys (
     verification_key INT NOT NULL,
     created_at TEXT NOT NULL,
     expires_at TEXT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES user(user_id)
+    FOREIGN KEY (user_id) REFERENCES user(user_id) on delete CASCADE on update CASCADE
 );
 
 CREATE TABLE listing(

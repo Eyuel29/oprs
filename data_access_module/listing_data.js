@@ -20,7 +20,6 @@ const getListingCount = async (filterModel) => {
   try {
     let whereClause = ' listing_status = 3000 ';
     let AND = '';
-
     for (const property in filterModel) {
       if(whereClause) AND = 'AND';  
       if (filterModel.hasOwnProperty(property)) {
@@ -154,7 +153,35 @@ const getListingPage = async (page, filterModel) => {
   } finally {
     connection.release();
   }
-};
+}
+
+
+const getAllListings = async () => {
+  const connection = await pool.getConnection();
+  connection.beginTransaction();
+
+  try {
+    const selectionQuery = `
+      SELECT 
+        listing.*,
+        (SELECT JSON_ARRAYAGG(amenities.name) FROM amenities WHERE amenities.listing_id = listing.listing_id) AS amenities,
+        (SELECT COUNT(*) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS review_count,
+        (SELECT FLOOR(AVG(rating)) FROM reviews WHERE reviews.reviewed_listing_id = listing.listing_id) AS average_rating,
+        (SELECT JSON_ARRAYAGG(describing_terms.term) FROM describing_terms WHERE describing_terms.listing_id = listing.listing_id) AS describing_terms,
+        (SELECT JSON_ARRAYAGG(listing_photos.url) FROM listing_photos WHERE listing_photos.listing_id = listing.listing_id) AS photo_urls FROM listing;`;
+
+    const [rows] = await connection.execute(selectionQuery);
+
+    return rows
+  } catch (err) {
+    connection.rollback();
+    throw err;
+  } finally {
+    connection.release();
+  }
+}
+
+
 
 const getMatchingListing = async (searchQuery, page) => {
   const connection = await pool.getConnection();
@@ -479,6 +506,6 @@ module.exports = {
     createListing,getListing,getOwnerListing,
     modifyListing,removeListing,setAvailable,
     setUnAvailable,reportListing,addPhotos,removePhotos,addAmenities,
-    removeAmenities, getListingPage,getMatchingListing, getListingCount,
+    removeAmenities,getListingPage,getAllListings ,getMatchingListing, getListingCount,
     addDescribingTerms, removeDescribingTerms
 }

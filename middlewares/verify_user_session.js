@@ -2,7 +2,6 @@ const { getUserSession, deleteUserSession } = require('../data_access_module/ses
 const sendErrorResponse = require('../utils/sendErrorResponse');
 
 const verifyUserSession = async (req, res, next) => {
-    
     try {
         const cookies = req?.cookies;
         if (!cookies?.session_id){

@@ -1,7 +1,7 @@
 require('dotenv').config();
 const pool = require('../config/db');
 
-const createSubAccount = async (user_id,account_number,sub_account_id,business_name,account_owner_name,bank_id,bank_name) =>{
+const createSubAccount = async (user_id,account_number,sub_account_id,business_name,account_owner_name,bank_id,bank_name) => {
     const connection = await pool.getConnection();
     try {
     const [result] = await connection.execute(

@@ -7,7 +7,7 @@ const createUser = async (user,contactInfo,photoUrl) =>{
     try {
     const {
         full_name,gender,phone_number,email,
-        zone,woreda,job_type,date_of_birth,married,
+        zone,woreda,job_type,id_type,id_number,id_photo_url,date_of_birth,married,
         account_status,region,user_role} = user;
 
         const [result] = await connection.execute(
@@ -19,12 +19,15 @@ const createUser = async (user,contactInfo,photoUrl) =>{
             zone,
             woreda,
             job_type,
+            id_type,
+            id_number,
+            id_photo_url,
             date_of_birth,
             account_status,
             region,
             married,
-            user_role) VALUES(?,?,?,?,?,?,?,?,?,?,?,?);`,
-        [full_name,gender,phone_number,email,zone,woreda,job_type,date_of_birth,account_status,region,married,user_role]);
+            user_role) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`,
+        [full_name,gender,phone_number,email,zone,woreda,job_type,id_type,id_number,id_photo_url,date_of_birth,account_status,region,married,user_role]);
 
         const placeholders = contactInfo.map(() => '(?, ?)').join(',');
         const values = contactInfo.reduce((acc, contact) => {
@@ -117,7 +120,8 @@ const getUser = async (userId) =>{
 const getUserByEmail = async (email) =>{
     const connection = await pool.getConnection();
     try {
-        const [rows] = await connection.execute(`SELECT 
+        const [rows] = await connection.execute(
+        `SELECT 
         user.*,
         COALESCE(
         (SELECT user_auth.auth_string 
@@ -152,18 +156,13 @@ const getAllUsers = async () =>{
     try {
         const [rows] = await connection.execute(`SELECT 
     user.*,
-    COALESCE(
-        (SELECT user_photos.url 
-         FROM user_photos 
-         WHERE user.user_id = user_photos.user_id 
-         LIMIT 1), 
-        '') AS photo_url,
+    COALESCE((SELECT user_photos.url 
+        FROM user_photos 
+        WHERE user.user_id = user_photos.user_id 
+        LIMIT 1), '') AS photo_url,
     COALESCE(
         JSON_ARRAYAGG(
-            JSON_OBJECT(
-                'contact_name', contact_info.contact_name, 
-                'contact_address', contact_info.contact_address
-            )
+            JSON_OBJECT('contact_name', contact_info.contact_name, 'contact_address', contact_info.contact_address)
         ), JSON_ARRAY()) AS contact_infos FROM user 
     LEFT JOIN contact_info ON user.user_id = contact_info.user_id GROUP BY user.user_id;`);
         return rows;

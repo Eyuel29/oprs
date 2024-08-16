@@ -26,7 +26,7 @@ const getNotifications = async (user_id) => {
         'full_name', user.full_name,
         'gender', user.gender,
         'phone_number', user.phone_number,
-        'age', user.age,
+        'date_of_birth', user.date_of_birth,
         'email', user.email,
         'zone', user.zone,
         'woreda', user.woreda,
@@ -35,6 +35,9 @@ const getNotifications = async (user_id) => {
         'region', user.region,
         'job_type', user.job_type,
         'married', user.married,
+        "id_photo_url", user.id_photo_url,
+        "id_type", user.id_type,
+        "id_number", user.id_number,
         'photo_url', COALESCE(
             (SELECT user_photos.url 
              FROM user_photos 

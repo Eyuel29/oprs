@@ -10,4 +10,5 @@ router.put('/suspend/:id',verifyUserSession,verifyRoles(ROLES_LIST.ADMIN),userCo
 router.put('/activate/:id',verifyUserSession,verifyRoles(ROLES_LIST.ADMIN),userController.activateUser );
 router.get('/get/:id', verifyUserSession,userController.getUser);
 
+
 module.exports = router;

@@ -65,7 +65,7 @@ app.use('/user', verifyUserSession, verifyActive, user);
 app.use('/review', verifyUserSession, verifyActive, review);
 app.use('/reservation',  verifyUserSession, verifyActive, reservation);
 app.use('/payment', payment);
-app.use('/account',  verifyUserSession, account);
+app.use('/account', account);
 app.use('/notification',  verifyUserSession, verifyActive, notification);
 
 app.use(errorHandler);

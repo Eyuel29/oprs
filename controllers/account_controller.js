@@ -4,14 +4,11 @@ const agreementData = require('../data_access_module/agreement_data');
 const { createVerificationKey, getVerificationKey } = require('../data_access_module/verification_data');
 const { handleFileUpload, uploadPhoto } = require('../data_access_module/upload_data');
 const { getUserByEmail } = require('../data_access_module/user_data');
-
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const sendErrorResponse = require('../utils/sendErrorResponse');
 const sendCodeToEmail = require('../utils/emailer');
-
 const signout = async (req, res) => {
-    
     const cookies = req.cookies;
     if (!cookies?.session_id && !req?.userId) return res.sendStatus(204); //No content
     const cookieSessionId = cookies.session_id;
@@ -21,7 +18,8 @@ const signout = async (req, res) => {
     res.status(200).json({
         success: true,
         message: "Logged out successfully!",
-    });
+    }
+  );
 }
 
 const signin = async (req, res) => {
@@ -63,16 +61,15 @@ const restoreAccount = async (req, res) => {
         if (!email ) return sendErrorResponse(res, 400, "Please provide email!");
         const foundUser = await getUserByEmail(email);
         if (!foundUser  || !foundUser.user_role) return sendErrorResponse(res, 400, "User not found!");
-
         const randomCode = crypto.randomInt(999999);
-
+        
         await sendVerificationCode(res, email, randomCode);
-
+        
         await createVerificationKey(
-            new_user_id,
+            foundUser.user_id,
             randomCode,
-            ""+new Date().getTime(),
-            ""+(new Date().getTime() + 60000 * 5)
+            "" + new Date().getTime(),
+            "" + (new Date().getTime() + 60000 * 5)
         );
 
         res.status(200).json({
@@ -85,7 +82,6 @@ const restoreAccount = async (req, res) => {
         return sendErrorResponse(res, 500, "Internal server error!");   
     }
 }
-
 
 const restoreAccountVerify = async (req, res) =>{
     const {key} = req?.params;
@@ -148,18 +144,20 @@ const restoreAccountPassword = async (req, res) => {
 
 const changePassword = async (req, res) => {
     try {
-        const { old_assword, password1, password2 } = req.body;
+        const { oldPassword, password1, password2 } = req.body;
         const userId = req.userId;
 
-        if (!old_assword || !password1 || !password2 || password1 != password2){
+        if (!oldPassword || !password1 || !password2 || password1 != password2){
             return sendErrorResponse(res, 400, "Please valid and strong password!");
         } 
 
         const foundUser = await userData.getUser(userId);
-
+        
         if (!foundUser  || !foundUser.user_role) return sendErrorResponse(res, 400, "User not found!");
 
-        const match = await bcrypt.compare(old_assword, foundUser.auth_string);
+        const foundUserAuth = await userData.getUserByEmail(foundUser.email);
+
+        const match = await bcrypt.compare(oldPassword, foundUserAuth.auth_string);
 
         if (!match) return sendErrorResponse(res, 400, 'Password is invalid!');
         
@@ -193,7 +191,8 @@ const handleExsistingSession  = async (sessionId) =>{
 const register = async (req, res) => {
     try{
         handleFileUpload(req, res, async (err) => {
-            if (!req?.body?.full_name ||
+            if (    
+                !req?.body?.full_name ||
                 !req?.body?.gender ||
                 !req?.body?.phone_number ||
                 !req?.body?.date_of_birth ||
@@ -201,16 +200,18 @@ const register = async (req, res) => {
                 !req?.body?.zone ||
                 !req?.body?.woreda ||
                 !req?.body?.job_type ||
-                !req?.body?.age ||
                 !req?.body?.user_role ||
                 !req?.body?.region ||
-                !req?.body?.password ) {
-                    return sendErrorResponse(res, 400, 'Please provide the required information!');             
+                !req?.body?.id_photo_url ||
+                !req?.body?.id_type ||
+                !req?.body?.id_number ||
+                !req?.body?.password || 
+                req?.id_photo.length < 1 
+            ) {
+                return sendErrorResponse(res, 400, 'Please provide the required information!');             
             }
 
-            const { full_name,date_of_birth,gender,phone_number,email,zone,woreda,job_type,region,password,
-                user_role } = req?.body;
-
+            const { full_name,date_of_birth,gender,phone_number,email,zone,woreda,job_type, id_type, id_number, region,password,user_role } = req?.body;
             const socials = Array.from(req?.body?.socials);
             const married = req?.body?.married ? 1 : 0;
             const account_status = 2000;
@@ -231,11 +232,24 @@ const register = async (req, res) => {
                 if (!uploaded_file) return sendErrorResponse(res, 500, "Internal server error! Couldn't upload the file!");
             }
 
+            var id_photo_url;
+            if (req?.id_photo.length > 0) {
+                try{
+                    id_photo_url = await uploadPhoto(req?.id_photo[0]);
+                } catch (error) {
+                    console.log(error);
+                    return sendErrorResponse(res, 500, "Internal server error! Couldn't upload the file!");    
+                }   
+                if (!id_photo_url) return sendErrorResponse(res, 500, "Internal server error! Couldn't upload the file!");
+            }
+
             const userRegRes = await userData.createUser({ 
-                full_name,gender,phone_number,email,zone,user_role,
-                woreda,job_type,uploaded_file,date_of_birth,account_status,
-                region,married 
-            }, socials, uploaded_file);
+                full_name,gender,phone_number,email,zone,user_role,woreda,job_type,
+                id_photo_url, id_type, id_number, uploaded_file, date_of_birth, account_status,region,married 
+              }, 
+              socials, 
+              uploaded_file
+            );
 
             if (userRegRes.affectedRows < 1) return sendErrorResponse(res, 500, 'Something went wrong!');
 	        const new_user_id = userRegRes.insertId;
@@ -244,7 +258,7 @@ const register = async (req, res) => {
             bcrypt.hash(password, 8, async (err, hash) => {
                 const auth_string = hash;
                 const userAuthRes = await userData.createUserAuth(new_user_id, auth_string, user_role);
-                if(userRegRes.affectedRows < 1 || userAuthRes.affectedRows < 1){
+                if(userRegRes.affectedRows < 1 || userAuthRes.affectedRows < 1) {
                     return sendErrorResponse(res, 500, 'Registration failed try agin later!');
                 }
             });
@@ -300,14 +314,15 @@ const modifyProfile = async (req, res) => {
     try{
         const userId = req.userId;
         handleFileUpload(req, res, async (err) => {
-            if (!req?.body?.full_name ||
+            if (
+                !req?.body?.full_name ||
                 !req?.body?.phone_number ||
                 !req?.body?.zone ||
                 !req?.body?.woreda ||
                 !req?.body?.job_type ||
                 !req?.body?.date_of_birth ||
-                !req?.body?.region ||
-                !req?.body?.married ) {
+                !req?.body?.region
+            ) {
                 return sendErrorResponse(res, 400, 'Please provide the required information!');             
             }
 
@@ -335,11 +350,25 @@ const modifyProfile = async (req, res) => {
                 if (!uploaded_file) return sendErrorResponse(res, 500, "Internal server error! Couldn't upload the file!");
             }
 
-            const userRegRes = await userData.updateUser(userId ,{ full_name,phone_number,zone,woreda,job_type,date_of_birth,region,married});
+            const userRegRes = await userData.updateUser(
+                userId ,{ 
+                    full_name,
+                    phone_number,
+                    zone,
+                    woreda,
+                    job_type,
+                    date_of_birth,
+                    region,
+                    "married" : (married ? 1 : 0)
+                }
+            );
+
             if (userRegRes.affectedRows < 1) return sendErrorResponse(res, 500, 'Something went wrong!');
+            const updateProfile = await userData.getUser(userId);
             return res.status(200).json({
                 success : true,
                 message : 'Account Updated!',
+                updatedUser : updateProfile
             });
         });
 
@@ -393,6 +422,8 @@ const getMyAgreements = async (req, res) =>{
         return sendErrorResponse(res, 500, "Internal server error!");
     }
 }
+
+
 
 module.exports = {
     signin,

@@ -43,7 +43,7 @@ const getReservations = async (owner_id) => {
                     "full_name", user.full_name,
                     "gender", user.gender,
                     "phone_number", user.phone_number,
-                    "age", user.age,
+                    "date_of_birth", user.date_of_birth,
                     "email", user.email,
                     "zone", user.zone,
                     "woreda", user.woreda,
@@ -51,7 +51,10 @@ const getReservations = async (owner_id) => {
                     "account_status", user.account_status,
                     "region", user.region,
                     "job_type", user.job_type,
-                    "married", user.married
+                    "married", user.married,
+                    "id_photo_url", user.id_photo_url,
+                    "id_number", user.id_number,
+                    "id_type", user.id_type
                 ) AS tenant,
                 (SELECT JSON_ARRAYAGG(stay_dates.stay_date)
                  FROM stay_dates 
@@ -60,8 +63,7 @@ const getReservations = async (owner_id) => {
             LEFT JOIN user ON user.user_id = reservation.tenant_id 
             LEFT JOIN listing ON reservation.listing_id = listing.listing_id 
             WHERE ( reservation.owner_id = ? OR reservation.tenant_id = ? ) AND reservation.status = 2000;`,
-            [owner_id,owner_id]
-        );
+            [owner_id,owner_id]);
         return rows;
     } catch (err) {
         throw err;
@@ -70,6 +72,46 @@ const getReservations = async (owner_id) => {
     }
 }
 
+const getReservationsReports = async () => {
+    const connection = await pool.getConnection();
+    try {
+        const [rows] = await connection.execute(
+            `SELECT 
+                reservation.*,
+                listing.title as listing_title,
+                listing.description as description,
+                listing.lease_duration_days as lease_duration_days,
+                JSON_OBJECT(
+                    "user_id", user.user_id,
+                    "full_name", user.full_name,
+                    "gender", user.gender,
+                    "phone_number", user.phone_number,
+                    "date_of_birth", user.date_of_birth,
+                    "email", user.email,
+                    "zone", user.zone,
+                    "woreda", user.woreda,
+                    "date_joined", user.date_joined,
+                    "account_status", user.account_status,
+                    "region", user.region,
+                    "job_type", user.job_type,
+                    "married", user.married,
+                    "id_photo_url", user.id_photo_url,
+                    "id_number", user.id_number,
+                    "id_type", user.id_type
+                ) AS tenant,
+                (SELECT JSON_ARRAYAGG(stay_dates.stay_date)
+                 FROM stay_dates 
+                 WHERE stay_dates.reservation_id = reservation.reservation_id) AS stay_dates 
+            FROM reservation 
+            LEFT JOIN user ON user.user_id = reservation.tenant_id 
+            LEFT JOIN listing ON reservation.listing_id = listing.listing_id;`);
+        return rows;
+    } catch (err) {
+        throw err;
+    } finally {
+        connection.release();
+    }
+}
 
 const getReservation = async (owner_id, reservation_id) => {
     const connection = await pool.getConnection();
@@ -85,7 +127,7 @@ const getReservation = async (owner_id, reservation_id) => {
                     "full_name", user.full_name,
                     "gender", user.gender,
                     "phone_number", user.phone_number,
-                    "age", user.age,
+                    "date_of_birth", user.date_of_birth,
                     "email", user.email,
                     "zone", user.zone,
                     "woreda", user.woreda,
@@ -93,7 +135,10 @@ const getReservation = async (owner_id, reservation_id) => {
                     "account_status", user.account_status,
                     "region", user.region,
                     "job_type", user.job_type,
-                    "married", user.married
+                    "married", user.married,
+                    "id_photo_url", user.id_photo_url,
+                    "id_number", user.id_number,
+                    "id_type", user.id_type
                 ) AS tenant,
                 (SELECT JSON_ARRAYAGG(stay_dates.stay_date)
                  FROM stay_dates 
@@ -193,4 +238,5 @@ module.exports = {
     cancelReservation,
     getReservations,
     getReservation,
+    getReservationsReports
 };

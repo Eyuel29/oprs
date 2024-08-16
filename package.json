@@ -25,7 +25,8 @@
     "nodemailer": "^6.9.12",
     "passport": "^0.7.0",
     "request": "^2.88.2",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "node app.js"
