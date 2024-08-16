@@ -19,6 +19,45 @@
         <button id="export-button">Export to Excel</button>
         <div id="listings-container"></div>
     </div>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin: 5px;
+
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 20px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 8px;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const listingsContainer = document.getElementById('listings-container');
