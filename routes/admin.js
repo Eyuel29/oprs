@@ -1,4 +1,4 @@
-const ROLES_LIST = require('../config/ROLES');
+const Roles = require('../config/roles');
 const pool = require('../config/db');
 const path = require('path');
 const fs = require('fs');
@@ -17,19 +17,19 @@ const listingData = require("../data_access_module/listing_data");
 const reservationData = require("../data_access_module/reservation_data");
 const paymentData = require("../data_access_module/payment_data");
 
-router.use('/home',verifyAdminSession,verifyRoles(ROLES_LIST.ADMIN), (req, res) => res.redirect('/admin/metrics'));
+router.use('/home',verifyAdminSession,verifyRoles(Roles.ADMIN), (req, res) => res.redirect('/admin/metrics'));
 router.use('/signin',(req, res) => res.sendFile(path.join(__dirname,'..','public/signin.html')));
-router.use('/signout',verifyAdminSession,verifyRoles(ROLES_LIST.ADMIN), (req, res) => {
+router.use('/signout',verifyAdminSession,verifyRoles(Roles.ADMIN), (req, res) => {
     res.clearCookie();
     res.redirect('/');
 });
 
-router.use('/metrics', verifyAdminSession,verifyRoles(ROLES_LIST.ADMIN), (req, res) => res.render('metrics-view'));
-router.use('/users', verifyAdminSession,verifyRoles(ROLES_LIST.ADMIN), (req, res) => res.render('user-view'));
-router.use('/listings', verifyAdminSession,verifyRoles(ROLES_LIST.ADMIN), (req, res) => res.render('listing-view'));
-router.use('/log', verifyAdminSession,verifyRoles(ROLES_LIST.ADMIN), (req, res) => res.render('log-view'));
-router.use('/backup', verifyAdminSession,verifyRoles(ROLES_LIST.ADMIN), (req, res) => res.render('backup-view'));
-router.use('/payments', verifyAdminSession,verifyRoles(ROLES_LIST.ADMIN), (req, res) => res.render('payment-refrence-view'));
+router.use('/metrics', verifyAdminSession,verifyRoles(Roles.ADMIN), (req, res) => res.render('metrics-view'));
+router.use('/users', verifyAdminSession,verifyRoles(Roles.ADMIN), (req, res) => res.render('user-view'));
+router.use('/listings', verifyAdminSession,verifyRoles(Roles.ADMIN), (req, res) => res.render('listing-view'));
+router.use('/log', verifyAdminSession,verifyRoles(Roles.ADMIN), (req, res) => res.render('log-view'));
+router.use('/backup', verifyAdminSession,verifyRoles(Roles.ADMIN), (req, res) => res.render('backup-view'));
+router.use('/payments', verifyAdminSession,verifyRoles(Roles.ADMIN), (req, res) => res.render('payment-refrence-view'));
 
 router.use('/dashboard', (req, res) => res.render('dashboard'));
 
@@ -55,7 +55,7 @@ const uploadBackupData = async (dataBuffer, filename) => {
   });
 };
 
-router.use('/createBackup', verifyAdminSession, verifyRoles(ROLES_LIST.ADMIN), async (req, res) => {
+router.use('/createBackup', verifyAdminSession, verifyRoles(Roles.ADMIN), async (req, res) => {
   const connection = await pool.getConnection();
   try {
     const DB_HOST = process.env.DB_HOST;
