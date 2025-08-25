@@ -1,13 +1,16 @@
-const userData = require("../data_access_module/user_data");
-const sendErrorResponse = require("../utils/sendErrorResponse");
-const ACCOUNT_STATUS = require("../config/verify_status");
+const userData = require("../queries/user_data");
+
+const accountStatus = require("../config/account_status");
 
 const removeUser = async (req, res) => {
     try {
     const userId = req?.params?.id;
 
     if (!userId) {
-      return sendErrorResponse(res, 400, "Incomplete information!");
+      return res.status(400).json({
+        success: false,
+        message: "Incomplete Information!",
+    });
     }
     const result = await userData.deleteUser(userId);
     if (result.affectedRows > 0) {
@@ -16,20 +19,32 @@ const removeUser = async (req, res) => {
           message: `successfully deleted user : ${userId}`
       });
     }
-    return sendErrorResponse(res, 409, "Unable to remove user");
+    return res.status(500).json({
+        success: false,
+        message: "Internal Server Error!",
+    });
   } catch (error) {
     console.log(error);
-    return sendErrorResponse(res, 500, "Internal server error!");
+    return res.status(500).json({
+        success: false,
+        message: "Internal Server Error!",
+    });
   }
 };
 
 const getAllUsers = async (req, res) => {
   try {
     const page = req?.params?.page;
-    if (!page) return sendErrorResponse(res, 400, "Incomplete information!");
+    if (!page) return res.status(400).json({
+        success: false,
+        message: "Incomplete Information!",
+    });
 
     const result = await userData.getAllUsers(page);
-    if (!result) return sendErrorResponse(res,404,"Not found, unable to show users!");
+    if (!result || result.length < 1) return res.status(404).json({
+        success: false,
+        message: "No Users To Show!",
+    });
 
     return res.status(200).json({
         success: true,
@@ -39,7 +54,10 @@ const getAllUsers = async (req, res) => {
 
   } catch (error) {
     console.log(error);
-    return sendErrorResponse(res, 500, "Internal server error!");
+    return res.status(500).json({
+        success: false,
+        message: "Internal Server Error!",
+    });
   }
 };
 
@@ -48,7 +66,10 @@ const getUser = async (req, res) => {
     const userId = req?.params?.id;
     const userRole = req.userRole;
 
-    if (!userId) return sendErrorResponse(res, 400, "Incomplete information!");
+    if (!userId) return res.status(400).json({
+        success: false,
+        message: "Incomplete Information!",
+    });
     const result = await userData.getUser(userId);
 
     if (result) {
@@ -66,7 +87,10 @@ const getUser = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    return sendErrorResponse(res, 500, "Internal server error!");
+    return res.status(500).json({
+        success: false,
+        message: "Internal Server Error!",
+    });
   }
 };
 
@@ -74,10 +98,13 @@ const suspendUser = async (req, res) => {
   try {
     const userId = req?.params?.id;
     if (!userId) {
-      return sendErrorResponse(res, 400, "Incomplete information!");
+      return res.status(400).json({
+        success: false,
+        message: "Incomplete Information!",
+    });
     }
 
-    const result = await userData.changeUserStatus(userId, ACCOUNT_STATUS.SUSPENDED);
+    const result = await userData.changeUserStatus(userId, accountStatus.SUSPENDED);
     if (result.affectedRows < 1) {
       return res.status(200).json({
           success: false,
@@ -93,7 +120,10 @@ const suspendUser = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    return sendErrorResponse(res, 500, "Internal server error!");
+    return res.status(500).json({
+        success: false,
+        message: "Internal Server Error!",
+    });
   }
 };
 
@@ -102,10 +132,13 @@ const activateUser = async (req, res) => {
     const userId = req?.params?.id;
 
     if (!userId) {
-      return sendErrorResponse(res, 400, "Incomplete information!");
+      return res.status(400).json({
+        success: false,
+        message: "Incomplete Information!",
+    });
     }
 
-    const result = await userData.changeUserStatus(userId, ACCOUNT_STATUS.ACTIVE);
+    const result = await userData.changeUserStatus(userId, accountStatus.ACTIVE);
     if (result.affectedRows < 1) {
       return res.status(200).json({
           success: false,
@@ -121,7 +154,10 @@ const activateUser = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    return sendErrorResponse(res, 500, "Internal server error!");
+    return res.status(500).json({
+        success: false,
+        message: "Internal Server Error!",
+    });
   }
 };
 

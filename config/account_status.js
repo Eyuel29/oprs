@@ -1,7 +1,5 @@
-const accountStatus = {
-    INACTIVE : "INACTIVE",
-    ACTIVE : "ACTIVE",
-    SUSPENDED : "SUSPENDED"
+module.exports = {
+  "ACTIVE": "active",
+  "INCATIVE": "incative",
+  "SUSPENDED": "suspended",
 };
-
-module.exports = accountStatus;

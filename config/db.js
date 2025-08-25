@@ -1,6 +1,6 @@
 const db = require('mysql2/promise');
 
-const pool = db.createPool({
+module.exports = db.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
@@ -10,5 +10,3 @@ const pool = db.createPool({
     connectionLimit: 10,
     queueLimit: 0,
 });
-
-module.exports = pool;

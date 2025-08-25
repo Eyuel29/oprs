@@ -1,9 +1,7 @@
-const notificationTypes = {
-    "APPROVE": "APPROVE",
-    "DECLINE": "DECLINE",
-    "BILL": "BILL",
-    "PAYMENT": "PAYMENT",
-    "EVENT": "EVENT",
-}
-
-module.exports = notificationTypes;
+module.exports = {
+    "APPROVE": "approve",
+    "DECLINE": "decline",
+    "BILL": "bill",
+    "PAYMENT": "payment",
+    "EVENT": "event",
+};

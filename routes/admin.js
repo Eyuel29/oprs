@@ -9,13 +9,11 @@ const { verifyAdminSession } = require('../middlewares/verify_admin_session');
 const router = require('express').Router();
 const requestCache = require('../config/log_cache_config')
 const { exec } = require('child_process');
-const sendErrorResponse = require('../utils/sendErrorResponse');
-
-const userData = require('../data_access_module/user_data');
-const agreementData = require("../data_access_module/agreement_data");
-const listingData = require("../data_access_module/listing_data");
-const reservationData = require("../data_access_module/reservation_data");
-const paymentData = require("../data_access_module/payment_data");
+const userData = require('../queries/user_data');
+const agreementData = require("../queries/agreement_data");
+const listingData = require("../queries/listing_data");
+const reservationData = require("../queries/reservation_data");
+const paymentData = require("../queries/payment_data");
 
 router.use('/home',verifyAdminSession,verifyRoles(Roles.ADMIN), (req, res) => res.redirect('/admin/metrics'));
 router.use('/signin',(req, res) => res.sendFile(path.join(__dirname,'..','public/signin.html')));

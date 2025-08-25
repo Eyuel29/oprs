@@ -1,4 +1,4 @@
-const { getUserSession, deleteUserSession } = require('../data_access_module/session_data');
+const { getUserSession, deleteUserSession } = require('../queries/session_data');
 const verifyAdminSession = async (req, res, next) => {    
     try {
         const cookies = req?.cookies;
