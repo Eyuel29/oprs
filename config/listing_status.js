@@ -1,4 +1,4 @@
 module.exports = {
-    "AVAILABLE": "available",
-    "UNAVAILABLE": "unavailable"
+  AVAILABLE: 'available',
+  UNAVAILABLE: 'unavailable',
 };

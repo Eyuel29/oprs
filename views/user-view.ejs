@@ -94,25 +94,25 @@
                     <div class="user-card-header">
                         <img src="${e.photo_url}" alt="User Photo" class="user-photo">
                         <div class="user-info">
-                            <h2 class="user-name">${e.full_name}</h2>
-                            <p class="user-role">${e.job_type}</p>
+                            <h2 class="user-name">${e.fullName}</h2>
+                            <p class="user-role">${e.jobType}</p>
                         </div>
                     </div>
                     <div class="user-card-body">
                         <p><strong>Email:</strong> ${e.email}</p>
-                        <p><strong>Phone Number:</strong> ${e.phone_number}</p>
+                        <p><strong>Phone Number:</strong> ${e.phoneNumber}</p>
                         <p><strong>Gender:</strong> ${e.gender}</p>
                         <p><strong>Region:</strong> ${e.region}</p>
                         <p><strong>Zone:</strong> ${e.zone}</p>
                         <p><strong>Woreda:</strong> ${e.woreda}</p>
-                        <p><strong>Date Joined:</strong> ${new Date(e.date_joined).toLocaleDateString()}</p>
-                        <p><strong>Account Status:</strong> ${e.account_status}</p>
+                        <p><strong>Date Joined:</strong> ${new Date(e.dateJoined).toLocaleDateString()}</p>
+                        <p><strong>Account Status:</strong> ${e.accountStatus}</p>
                         <p><strong>Married:</strong> ${e.married ? 'Yes' : 'No'}</p>
                     </div>
                     <div class="user-card-footer">
-                        ${e.account_status >= 3000 ? "" : `<button onClick="activateUser(${e.user_id})" class="btn activate-btn">Activate</button>`}
-                        ${e.account_status <= 1000 ? "" : `<button onClick="suspendUser(${e.user_id})" class="btn suspend-btn">Suspend</button>`}
-                        <button onClick="deleteUser(${e.user_id})" class="btn delete-btn">Delete</button>
+                        ${e.accountStatus !== 'active' ? "" : `<button onClick="activateUser(${e.userId})" class="btn activate-btn">Activate</button>`}
+                        ${e.accountStatus !== 'suspended' ? "" : `<button onClick="suspendUser(${e.userId})" class="btn suspend-btn">Suspend</button>`}
+                        <button onClick="deleteUser(${e.userId})" class="btn delete-btn">Delete</button>
                     </div>
                 </div>
             `;

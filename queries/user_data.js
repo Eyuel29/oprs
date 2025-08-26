@@ -1,258 +1,319 @@
+/* eslint-disable no-useless-catch */
 require('dotenv').config();
 const pool = require('../config/db');
 
-const createUser = async (user,contactInfo,photoUrl) =>{
-    const connection = await pool.getConnection();
-    connection.beginTransaction();
-    try {
+const createUser = async (user, contactInfo, photoUrl) => {
+  const connection = await pool.getConnection();
+  connection.beginTransaction();
+  try {
     const {
-        full_name,gender,phone_number,email,
-        zone,woreda,job_type,id_type,id_number,id_photo_url,date_of_birth,married,
-        account_status,region,user_role,citizenship} = user;
+      fullName,
+      gender,
+      phoneNumber,
+      email,
+      zone,
+      woreda,
+      jobType,
+      idType,
+      idNumber,
+      idPhotoUrl,
+      dateOfBirth,
+      married,
+      accountStatus,
+      region,
+      role,
+      citizenship,
+    } = user;
 
-        const [result] = await connection.execute(
-           `INSERT INTO user(
-            full_name,
+    const [result] = await connection.execute(
+      `INSERT INTO user(
+            fullName,
             gender,
-            phone_number,
+            phoneNumber,
             email,
             zone,
             woreda,
-            job_type,
-            id_type,
-            id_number,
-            id_photo_url,
-            date_of_birth,
-            account_status,
+            jobType,
+            idType,
+            idNumber,
+            idPhotoUrl,
+            dateOfBirth,
+            accountStatus,
             region,
             married,
-            user_role,
+            role,
             citizenship	) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`,
-        [full_name,gender,phone_number,email,zone,woreda,job_type,id_type,id_number,id_photo_url,date_of_birth,account_status,region,married,user_role, citizenship]);
+      [
+        fullName,
+        gender,
+        phoneNumber,
+        email,
+        zone,
+        woreda,
+        jobType,
+        idType,
+        idNumber,
+        idPhotoUrl,
+        dateOfBirth,
+        accountStatus,
+        region,
+        married,
+        role,
+        citizenship,
+      ]
+    );
 
-        const placeholders = contactInfo.map(() => '(?, ?)').join(',');
-        const values = contactInfo.reduce((acc, contact) => {
-            acc.push(user_id, contact.full_name, contact.contact_address);
-            return acc;
-        }, []);
-    
-        if (contactInfo && contactInfo.length > 0) {
-            await connection.execute(`INSERT INTO contact_info (user_id, contact_name, contact_address) VALUES ${placeholders}`, [values]);   
-        }
+    const placeholders = contactInfo.map(() => '(?, ?)').join(',');
+    const values = contactInfo.reduce((acc, contact) => {
+      acc.push(userId, contact.fullName, contact.contactAddress);
+      return acc;
+    }, []);
 
-        if (photoUrl) {
-            await connection.execute(`INSERT INTO user_photos (user_id, url) VALUES(?,?);`,[result.insertId, photoUrl]);
-        }
-        
-        connection.commit();
-        return result;
-    } catch (error) {
-        connection.rollback();
-        throw error;
-    }finally{
-        connection.release();
+    if (contactInfo && contactInfo.length > 0) {
+      await connection.execute(
+        `INSERT INTO contactInfo (userId, contactName, contactAddress) VALUES ${placeholders}`,
+        [values]
+      );
     }
-}
 
-const addcontactInfo = async (user_id, contactInfo) => {
-    const connection = await pool.getConnection();
-    try {
-      const placeholders = contactInfo.map(() => '(?, ?)').join(',');
-      const values = contactInfo.reduce((acc, contact) => {
-        acc.push(user_id, contact.full_name, contact.contact_address);
-        return acc;
-      }, []);
-  
-      const query = `INSERT INTO contact_info (user_id, contact_name, contact_address) VALUES ${placeholders}`;
-      const [rows] = await connection.execute(query, values);
-
-      return rows;
-    } catch (err) {
-      throw err;
-    } finally {
-      connection.release();
+    if (photoUrl) {
+      await connection.execute(
+        `INSERT INTO userPhotos (userId, url) VALUES(?,?);`,
+        [result.insertId, photoUrl]
+      );
     }
+
+    connection.commit();
+    return result;
+  } catch (error) {
+    connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 };
-  
-const createUserAuth = async (userId, authString) =>{
-    const connection = await pool.getConnection();
-    try {
-        const [result] = await connection.
-        execute('INSERT INTO user_auth(user_id, auth_string) VALUES(?, ?);',
-        [userId, authString]);
-        return result;
-    } catch (error) {
-        throw error;
-    }finally{
-        connection.release();
-    }
-}
 
+const addcontactInfo = async (userId, contactInfo) => {
+  const connection = await pool.getConnection();
+  try {
+    const placeholders = contactInfo.map(() => '(?, ?)').join(',');
+    const values = contactInfo.reduce((acc, contact) => {
+      acc.push(userId, contact.fullName, contact.contactAddress);
+      return acc;
+    }, []);
 
-const getUser = async (userId) =>{
-    const connection = await pool.getConnection();
-    try {
-        const [rows] = await connection.execute(`SELECT 
+    const query = `INSERT INTO contactInfo (userId, contactName, contactAddress) VALUES ${placeholders}`;
+    const [rows] = await connection.execute(query, values);
+
+    return rows;
+  } catch (err) {
+    throw err;
+  } finally {
+    connection.release();
+  }
+};
+
+const createUserAuth = async (userId, authString) => {
+  const connection = await pool.getConnection();
+  try {
+    const [result] = await connection.execute(
+      'INSERT INTO userAuth(userId, authString) VALUES(?, ?);',
+      [userId, authString]
+    );
+    return result;
+  } catch (error) {
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
+
+const getUser = async (userId) => {
+  const connection = await pool.getConnection();
+  try {
+    const [rows] = await connection.execute(
+      `SELECT 
         user.*,
         COALESCE(( 
-            SELECT user_photos.url 
-            FROM user_photos 
-            WHERE user.user_id = user_photos.user_id 
+            SELECT userPhotos.url 
+            FROM userPhotos 
+            WHERE user.userId = userPhotos.userId 
             LIMIT 1 
         ),'') AS photo_url,
         COALESCE(
             JSON_ARRAYAGG(
                 JSON_OBJECT(
-                    'contact_name', contact_info.contact_name, 
-                    'contact_address', contact_info.contact_address
+                    'contactName', contactInfo.contactName, 
+                    'contactAddress', contactInfo.contactAddress
                 )
             ), JSON_ARRAY()
-        ) AS contact_infos 
-        FROM user LEFT JOIN contact_info ON user.user_id = contact_info.user_id 
-        WHERE user.user_id = ? GROUP BY user.user_id;`, [userId]);
-        return rows[0];
-    } catch (err) {
-        throw err;
-    }finally{
-        connection.release();
-    }
-}
+        ) AS contactInfos 
+        FROM user LEFT JOIN contactInfo ON user.userId = contactInfo.userId 
+        WHERE user.userId = ? GROUP BY user.userId;`,
+      [userId]
+    );
+    return rows[0];
+  } catch (err) {
+    throw err;
+  } finally {
+    connection.release();
+  }
+};
 
-const getUserByEmail = async (email) =>{
-    const connection = await pool.getConnection();
-    try {
-        const [rows] = await connection.execute(
-        `SELECT 
+const getUserByEmail = async (email) => {
+  const connection = await pool.getConnection();
+  try {
+    const [rows] = await connection.execute(
+      `SELECT 
         user.*,
         COALESCE(
-        (SELECT user_auth.auth_string 
-            FROM user_auth 
-            WHERE user.user_id = user_auth.user_id 
+        (SELECT userAuth.authString 
+            FROM userAuth 
+            WHERE user.userId = userAuth.userId 
             LIMIT 1), 
-        '') AS auth_string,
+        '') AS authString,
         COALESCE(
-        (SELECT user_photos.url 
-            FROM user_photos 
-            WHERE user.user_id = user_photos.user_id 
+        (SELECT userPhotos.url 
+            FROM userPhotos 
+            WHERE user.userId = userPhotos.userId 
             LIMIT 1), 
         '') AS photo_url,
         COALESCE(
         JSON_ARRAYAGG(
             JSON_OBJECT(
-                'contact_name', contact_info.contact_name, 
-                'contact_address', contact_info.contact_address
-            )), JSON_ARRAY()) AS contact_infos 
-        FROM user LEFT JOIN contact_info ON user.user_id = contact_info.user_id 
-        WHERE user.email = ? GROUP BY user.user_id;`, [email]);
-        return rows[0];
-    } catch (err) {
-        throw err;
-    }finally{
-        connection.release();
-    }
-}
+                'contactName', contactInfo.contactName, 
+                'contactAddress', contactInfo.contactAddress
+            )), JSON_ARRAY()) AS contactInfos 
+        FROM user LEFT JOIN contactInfo ON user.userId = contactInfo.userId 
+        WHERE user.email = ? GROUP BY user.userId;`,
+      [email]
+    );
+    return rows[0];
+  } catch (err) {
+    throw err;
+  } finally {
+    connection.release();
+  }
+};
 
-const getAllUsers = async () =>{
-    const connection = await pool.getConnection();
-    try {
-        const [rows] = await connection.execute(`SELECT 
+const getAllUsers = async () => {
+  const connection = await pool.getConnection();
+  try {
+    const [rows] = await connection.execute(`SELECT 
     user.*,
-    COALESCE((SELECT user_photos.url 
-        FROM user_photos 
-        WHERE user.user_id = user_photos.user_id 
+    COALESCE((SELECT userPhotos.url 
+        FROM userPhotos 
+        WHERE user.userId = userPhotos.userId 
         LIMIT 1), '') AS photo_url,
     COALESCE(
         JSON_ARRAYAGG(
-            JSON_OBJECT('contact_name', contact_info.contact_name, 'contact_address', contact_info.contact_address)
-        ), JSON_ARRAY()) AS contact_infos FROM user 
-    LEFT JOIN contact_info ON user.user_id = contact_info.user_id GROUP BY user.user_id;`);
-        return rows;
-    } catch (err) {
-        throw err;
-    }finally{
-        connection.release();
-    }
-}
+            JSON_OBJECT('contactName', contactInfo.contactName, 'contactAddress', contactInfo.contactAddress)
+        ), JSON_ARRAY()) AS contactInfos FROM user 
+    LEFT JOIN contactInfo ON user.userId = contactInfo.userId GROUP BY user.userId;`);
+    return rows;
+  } catch (err) {
+    throw err;
+  } finally {
+    connection.release();
+  }
+};
 
 const updateUser = async (userId, userData, photoUrl) => {
-    const connection = await pool.getConnection();
-    try {
-        const setClause = Object.keys(userData).map(key => `${key} = ?`).join(', ');
-        const values = Object.values(userData);
-        values.push(userId);   
-        const query = `UPDATE user SET ${setClause} WHERE user_id = ?;`;
-        console.log(values);
-        
-        const [rows] = await connection.execute(query, values);
-        if (photoUrl) {
-            await connection.execute(`UPDATE user_photos SET url = ? WHERE user_id = ?;`,[photoUrl, userId]);
-        }
-        return rows;
-    } catch (err) {
-        throw err;
-    } finally {
-        connection.release();
-    }
-}
+  const connection = await pool.getConnection();
+  try {
+    const setClause = Object.keys(userData)
+      .map((key) => `${key} = ?`)
+      .join(', ');
+    const values = Object.values(userData);
+    values.push(userId);
+    const query = `UPDATE user SET ${setClause} WHERE userId = ?;`;
+    console.log(values);
 
-const changeUserStatus = async (userId, status) =>{
-    const connection = await pool.getConnection();
-    try {
-        const [rows] = await connection.execute(`UPDATE user SET account_status = ? WHERE user_id = ?;`, [status ,userId]);
-        return rows;
-    } catch (err) {
-        throw err;
-    }finally{
-        connection.release();
+    const [rows] = await connection.execute(query, values);
+    if (photoUrl) {
+      await connection.execute(
+        `UPDATE userPhotos SET url = ? WHERE userId = ?;`,
+        [photoUrl, userId]
+      );
     }
-}
+    return rows;
+  } catch (err) {
+    throw err;
+  } finally {
+    connection.release();
+  }
+};
 
-const changeUserAuthString = async (userId, auth_string) =>{
-    const connection = await pool.getConnection();
-    try {
-        const [rows] = await connection.execute(`UPDATE user_auth SET auth_string = ? WHERE user_id = ?;`, [auth_string ,userId]);
-        return rows;
-    } catch (err) {
-        throw err;
-    }finally{
-        connection.release();
-    }
-}
+const changeUserStatus = async (userId, status) => {
+  const connection = await pool.getConnection();
+  try {
+    const [rows] = await connection.execute(
+      `UPDATE user SET accountStatus = ? WHERE userId = ?;`,
+      [status, userId]
+    );
+    return rows;
+  } catch (err) {
+    throw err;
+  } finally {
+    connection.release();
+  }
+};
 
-const getUserStatus = async (userId) =>{
-    const connection = await pool.getConnection();
-    try {
-        const [rows] = await connection.execute('SELECT account_status FROM user WHERE user_id = ?;', [userId]);
-        return rows;
-    } catch (err) {
-        throw err;
-    }finally{
-        connection.release();
-    }
-}
+const changeUserAuthString = async (userId, authString) => {
+  const connection = await pool.getConnection();
+  try {
+    const [rows] = await connection.execute(
+      `UPDATE userAuth SET authString = ? WHERE userId = ?;`,
+      [authString, userId]
+    );
+    return rows;
+  } catch (err) {
+    throw err;
+  } finally {
+    connection.release();
+  }
+};
 
-const deleteUser = async (userId) =>{
-    const connection = await pool.getConnection();
-    try {
-        const [rows] = await connection.execute('DELETE FROM user WHERE user_id = ?;', [userId]);
-        return rows;
-    } catch (err) {
-        throw err;
-    }finally{
-        connection.release();
-    }
-}
+const getUserStatus = async (userId) => {
+  const connection = await pool.getConnection();
+  try {
+    const [rows] = await connection.execute(
+      'SELECT accountStatus FROM user WHERE userId = ?;',
+      [userId]
+    );
+    return rows;
+  } catch (err) {
+    throw err;
+  } finally {
+    connection.release();
+  }
+};
+
+const deleteUser = async (userId) => {
+  const connection = await pool.getConnection();
+  try {
+    const [rows] = await connection.execute(
+      'DELETE FROM user WHERE userId = ?;',
+      [userId]
+    );
+    return rows;
+  } catch (err) {
+    throw err;
+  } finally {
+    connection.release();
+  }
+};
 
 module.exports = {
-    createUser,
-    createUserAuth,
-    changeUserStatus,
-    getUserStatus,
-    getUser,
-    getUserByEmail,
-    getAllUsers,
-    updateUser,
-    deleteUser,
-    changeUserAuthString,
-    addcontactInfo
+  createUser,
+  createUserAuth,
+  changeUserStatus,
+  getUserStatus,
+  getUser,
+  getUserByEmail,
+  getAllUsers,
+  updateUser,
+  deleteUser,
+  changeUserAuthString,
+  addcontactInfo,
 };

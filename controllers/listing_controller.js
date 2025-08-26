@@ -1,11 +1,12 @@
-const listingData = require("../queries/listing_data");
+/* eslint-disable no-unsafe-optional-chaining */
+const listingData = require('../queries/listing_data');
 const {
   handleFileUpload,
   uploadPhoto,
   deleteFolder,
-} = require("../queries/upload_data");
+} = require('../queries/upload_data');
 
-const { getDate } = require("../utils/date");
+const { getDate } = require('../utils/date');
 
 const createListing = async (req, res) => {
   try {
@@ -14,171 +15,177 @@ const createListing = async (req, res) => {
         !req?.body?.type ||
         !req?.body?.title ||
         !req?.body?.description ||
-        !req?.body?.sub_city ||
+        !req?.body?.subCity ||
         !req?.body?.woreda ||
-        !req?.body?.area_name ||
+        !req?.body?.areaName ||
         !req?.body?.latitude ||
         !req?.body?.longitude ||
-        !req?.body?.payment_currency ||
-        !req?.body?.price_per_duration ||
-        !req?.body?.total_area_square_meter ||
-        !req?.body?.lease_duration_days
-      )
+        !req?.body?.paymentCurrency ||
+        !req?.body?.pricePerDuration ||
+        !req?.body?.totalAreaSquareMeter ||
+        !req?.body?.leaseDurationDays
+      ) {
         return res.status(400).json({
           success: false,
-          message: "Incomplete Information!",
+          message: 'Incomplete Information!',
         });
+      }
 
-      const owner_id = req?.userId;
+      const ownerId = req?.userId;
       const {
         type,
         title,
         description,
-        sub_city,
+        subCity,
         woreda,
-        area_name,
+        areaName,
         latitude,
         longitude,
-        price_per_duration,
-        payment_currency,
-        total_area_square_meter,
+        pricePerDuration,
+        paymentCurrency,
+        totalAreaSquareMeter,
         status,
-        floor_number,
-        distance_from_road_in_meters,
-        security_guards,
-        lease_duration_days,
-        tax_responsibility,
-        building_name,
-        catering_rooms,
-        back_stages,
+        floorNumber,
+        distanceFromRoadM,
+        securityGuards,
+        leaseDurationDays,
+        taxResponsibility,
+        buildingName,
+        cateringRooms,
+        backStages,
         furnished,
         backrooms,
         displays,
-        storage_capacity_square_meter,
-        customer_service_desks,
-        number_of_bedrooms,
-        number_of_bathrooms,
-        number_of_kitchens,
-        parking_capacity,
-        ceiling_height_in_meter,
-        number_of_floors,
-        loading_docks,
-        guest_capacity,
+        storageCapacitySqm,
+        customerServiceDesks,
+        numberOfBedrooms,
+        numberOfBathrooms,
+        numberOfKitchens,
+        parkingCapacity,
+        ceilingHeightM,
+        numberOfFloors,
+        loadingDocks,
+        guestCapacity,
       } = req?.body;
-      if (err)
+      if (err) {
         return res.status(400).json({
           success: false,
-          message: "Incomplete Information!",
+          message: 'Incomplete Information!',
         });
+      }
 
       const files = req?.files;
 
-      if (!files || files.length === 0)
+      if (!files || files.length === 0) {
         return res.status(400).json({
           success: false,
-          message: "Incomplete Information!",
+          message: 'Incomplete Information!',
         });
+      }
 
       let amenities = [];
       if (req?.body?.amenities) {
         amenities = Array.from(req?.body?.amenities) ?? [];
       }
 
-      let describing_terms = [];
-      if (req?.body?.describing_terms) {
-        describing_terms = Array.from(req?.body?.describing_terms) ?? [];
+      let additionalDescriptions = [];
+      if (req?.body?.additionalDescriptions) {
+        additionalDescriptions =
+          Array.from(req?.body?.additionalDescriptions) ?? [];
       }
 
-      const listing_Result = await listingData.createListing(
+      const listingResult = await listingData.createListing(
         {
-          owner_id: owner_id,
+          ownerId: ownerId,
           type: type,
           title: title,
           description: description,
-          sub_city: sub_city,
+          subCity: subCity,
           woreda: woreda,
-          area_name: area_name,
+          areaName: areaName,
           latitude: latitude,
           longitude: longitude,
-          price_per_duration: price_per_duration,
-          payment_currency: payment_currency,
-          total_area_square_meter: total_area_square_meter,
-          listing_status: status ?? 3000,
-          floor_number: floor_number ?? 0,
-          distance_from_road_in_meters: distance_from_road_in_meters ?? 0,
-          security_guards: security_guards ?? 0,
-          lease_duration_days: lease_duration_days ?? 1,
-          tax_responsibility: tax_responsibility ?? "",
-          building_name: building_name ?? "",
-          catering_rooms: catering_rooms ?? 0,
-          back_stages: back_stages ?? 0,
-          date_created: getDate(),
-          furnished: furnished ?? "",
+          pricePerDuration: pricePerDuration,
+          paymentCurrency: paymentCurrency,
+          totalAreaSquareMeter: totalAreaSquareMeter,
+          listingStatus: status ?? 'active',
+          floorNumber: floorNumber ?? 0,
+          distanceFromRoadM: distanceFromRoadM ?? 0,
+          securityGuards: securityGuards ?? 0,
+          leaseDurationDays: leaseDurationDays ?? 1,
+          taxResponsibility: taxResponsibility ?? '',
+          buildingName: buildingName ?? '',
+          cateringRooms: cateringRooms ?? 0,
+          backStages: backStages ?? 0,
+          dateCreated: getDate(),
+          furnished: furnished ?? '',
           backrooms: backrooms ?? 0,
           displays: displays ?? 0,
-          storage_capacity_square_meter: storage_capacity_square_meter ?? 0,
-          customer_service_desks: customer_service_desks ?? 0,
-          number_of_bedrooms: number_of_bedrooms ?? 0,
-          number_of_bathrooms: number_of_bathrooms ?? 0,
-          number_of_kitchens: number_of_kitchens ?? 0,
-          parking_capacity: parking_capacity ?? 0,
-          ceiling_height_in_meter: ceiling_height_in_meter ?? 0,
-          number_of_floors: number_of_floors ?? 0,
-          loading_docks: loading_docks ?? 0,
-          guest_capacity: guest_capacity ?? 0,
+          storageCapacitySqm: storageCapacitySqm ?? 0,
+          customerServiceDesks: customerServiceDesks ?? 0,
+          numberOfBedrooms: numberOfBedrooms ?? 0,
+          numberOfBathrooms: numberOfBathrooms ?? 0,
+          numberOfKitchens: numberOfKitchens ?? 0,
+          parkingCapacity: parkingCapacity ?? 0,
+          ceilingHeightM: ceilingHeightM ?? 0,
+          numberOfFloors: numberOfFloors ?? 0,
+          loadingDocks: loadingDocks ?? 0,
+          guestCapacity: guestCapacity ?? 0,
         },
         amenities ?? [],
-        describing_terms ?? []
+        additionalDescriptions ?? []
       );
 
-      if (listing_Result.affectedRows < 1)
+      if (listingResult.affectedRows < 1) {
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error!",
+          message: 'Internal Server Error!',
         });
+      }
 
-      const listing_id = listing_Result.insertId;
+      const listingId = listingResult.insertId;
 
       const uploadedFiles = [];
       for (const file of req?.files) {
         try {
-          const fileUrl = await uploadPhoto(file, listing_id);
+          const fileUrl = await uploadPhoto(file, listingId);
           uploadedFiles.push(fileUrl);
         } catch (error) {
+          // eslint-disable-next-line no-undef, no-console
           console.log(error);
           return res.status(500).json({
             success: false,
-            message: "Internal Server Error!",
+            message: 'Internal Server Error!',
           });
         }
       }
 
-      if (uploadedFiles.length < 1)
+      if (uploadedFiles.length < 1) {
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error!",
+          message: 'Internal Server Error!',
         });
-      const photoResult = await listingData.addPhotos(
-        listing_id,
-        uploadedFiles
-      );
-      if (photoResult.affectedRows < 1)
+      }
+      const photoResult = await listingData.addPhotos(listingId, uploadedFiles);
+      if (photoResult.affectedRows < 1) {
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error!",
+          message: 'Internal Server Error!',
         });
+      }
 
       return res.status(201).json({
         success: true,
-        message: "Successfully added the property!",
-        listing_id: listing_id,
+        message: 'Successfully added the property!',
+        listingId: listingId,
       });
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
@@ -191,309 +198,325 @@ const modifyListing = async (req, res) => {
         !req?.body?.type ||
         !req?.body?.title ||
         !req?.body?.description ||
-        !req?.body?.sub_city ||
+        !req?.body?.subCity ||
         !req?.body?.woreda ||
-        !req?.body?.area_name ||
+        !req?.body?.areaName ||
         !req?.body?.latitude ||
         !req?.body?.longitude ||
-        !req?.body?.price_per_duration ||
-        !req?.body?.payment_currency ||
-        !req?.body?.total_area_square_meter ||
-        !req?.body?.lease_duration_days
+        !req?.body?.pricePerDuration ||
+        !req?.body?.paymentCurrency ||
+        !req?.body?.totalAreaSquareMeter ||
+        !req?.body?.leaseDurationDays
       ) {
         return res.status(400).json({
           success: false,
-          message: "Incomplete Information!",
+          message: 'Incomplete Information!',
         });
       }
 
-      const listing_id = req?.params?.id;
-      const owner_id = req?.userId;
+      const listingId = req?.params?.id;
+      const ownerId = req?.userId;
       const {
         type,
         title,
         description,
-        sub_city,
+        subCity,
         woreda,
-        area_name,
+        areaName,
         latitude,
         longitude,
-        price_per_duration,
-        payment_currency,
-        total_area_square_meter,
+        pricePerDuration,
+        paymentCurrency,
+        totalAreaSquareMeter,
         status,
-        floor_number,
-        distance_from_road_in_meters,
-        security_guards,
-        lease_duration_days,
-        tax_responsibility,
-        building_name,
-        catering_rooms,
-        back_stages,
+        floorNumber,
+        distanceFromRoadM,
+        securityGuards,
+        leaseDurationDays,
+        taxResponsibility,
+        buildingName,
+        cateringRooms,
+        backStages,
         furnished,
         backrooms,
         displays,
-        storage_capacity_square_meter,
-        customer_service_desks,
-        number_of_bedrooms,
-        number_of_bathrooms,
-        number_of_kitchens,
-        parking_capacity,
-        ceiling_height_in_meter,
-        number_of_floors,
-        loading_docks,
-        guest_capacity,
+        storageCapacitySqm,
+        customerServiceDesks,
+        numberOfBedrooms,
+        numberOfBathrooms,
+        numberOfKitchens,
+        parkingCapacity,
+        ceilingHeightM,
+        numberOfFloors,
+        loadingDocks,
+        guestCapacity,
       } = req?.body;
 
-      if (err)
+      if (err) {
         return res.status(400).json({
           success: false,
-          message: "Incomplete Information!",
+          message: 'Incomplete Information!',
         });
-
-      const listing_Result = await listingData.modifyListing(listing_id, {
-        type: type,
-        owner_id: owner_id,
-        title: title,
-        description: description,
-        sub_city: sub_city,
-        woreda: woreda,
-        area_name: area_name,
-        latitude: latitude,
-        longitude: longitude,
-        price_per_duration: price_per_duration,
-        payment_currency: payment_currency,
-        total_area_square_meter: total_area_square_meter,
-        listing_status: status ?? 1000,
-        floor_number: floor_number ?? 0,
-        distance_from_road_in_meters: distance_from_road_in_meters ?? 0,
-        security_guards: security_guards ?? 0,
-        lease_duration_days: lease_duration_days ?? 1,
-        tax_responsibility: tax_responsibility ?? "",
-        building_name: building_name ?? "",
-        catering_rooms: catering_rooms ?? 0,
-        back_stages: back_stages ?? 0,
-        furnished: furnished ?? "",
-        backrooms: backrooms ?? 0,
-        displays: displays ?? 0,
-        storage_capacity_square_meter: storage_capacity_square_meter ?? 0,
-        customer_service_desks: customer_service_desks ?? 0,
-        number_of_bedrooms: number_of_bedrooms ?? 0,
-        number_of_bathrooms: number_of_bathrooms ?? 0,
-        number_of_kitchens: number_of_kitchens ?? 0,
-        parking_capacity: parking_capacity ?? 0,
-        ceiling_height_in_meter: ceiling_height_in_meter ?? 0,
-        number_of_floors: number_of_floors ?? 0,
-        loading_docks: loading_docks ?? 0,
-        guest_capacity: guest_capacity ?? 0,
-      });
-
-      if (listing_Result.affectedRows < 1)
-        return res.status(500).json({
-          success: false,
-          message: "Internal Server Error!",
-        });
-
-      let amenities = [];
-      if (req?.body?.amenities)
-        amenities = Array.from(req?.body?.amenities) ?? [];
-
-      if (amenities && amenities.length > 0) {
-        await listingData.removeAmenities(listing_id);
-        await listingData.addAmenities(listing_id, amenities);
-      } else {
-        await listingData.removeAmenities(listing_id);
       }
 
-      let describing_terms = [];
-      if (req?.body?.describing_terms)
-        describing_terms = Array.from(req?.body?.describing_terms) ?? [];
+      const listingResult = await listingData.modifyListing(listingId, {
+        type: type,
+        ownerId: ownerId,
+        title: title,
+        description: description,
+        subCity: subCity,
+        woreda: woreda,
+        areaName: areaName,
+        latitude: latitude,
+        longitude: longitude,
+        pricePerDuration: pricePerDuration,
+        paymentCurrency: paymentCurrency,
+        totalAreaSquareMeter: totalAreaSquareMeter,
+        listingStatus: status ?? 'inactive',
+        floorNumber: floorNumber ?? 0,
+        distanceFromRoadM: distanceFromRoadM ?? 0,
+        securityGuards: securityGuards ?? 0,
+        leaseDurationDays: leaseDurationDays ?? 1,
+        taxResponsibility: taxResponsibility ?? '',
+        buildingName: buildingName ?? '',
+        cateringRooms: cateringRooms ?? 0,
+        backStages: backStages ?? 0,
+        furnished: furnished ?? '',
+        backrooms: backrooms ?? 0,
+        displays: displays ?? 0,
+        storageCapacitySqm: storageCapacitySqm ?? 0,
+        customerServiceDesks: customerServiceDesks ?? 0,
+        numberOfBedrooms: numberOfBedrooms ?? 0,
+        numberOfBathrooms: numberOfBathrooms ?? 0,
+        numberOfKitchens: numberOfKitchens ?? 0,
+        parkingCapacity: parkingCapacity ?? 0,
+        ceilingHeightM: ceilingHeightM ?? 0,
+        numberOfFloors: numberOfFloors ?? 0,
+        loadingDocks: loadingDocks ?? 0,
+        guestCapacity: guestCapacity ?? 0,
+      });
 
-      if (describing_terms && describing_terms.length > 0) {
-        await listingData.removeDescribingTerms(listing_id);
-        await listingData.addDescribingTerms(listing_id, describing_terms);
+      if (listingResult.affectedRows < 1) {
+        return res.status(500).json({
+          success: false,
+          message: 'Internal Server Error!',
+        });
+      }
+
+      let amenities = [];
+      if (req?.body?.amenities) {
+        amenities = Array.from(req?.body?.amenities) ?? [];
+      }
+
+      if (amenities && amenities.length > 0) {
+        await listingData.removeAmenities(listingId);
+        await listingData.addAmenities(listingId, amenities);
       } else {
-        await listingData.removeDescribingTerms(listing_id);
+        await listingData.removeAmenities(listingId);
+      }
+
+      let additionalDescriptions = [];
+      if (req?.body?.additionalDescriptions) {
+        additionalDescriptions =
+          Array.from(req?.body?.additionalDescriptions) ?? [];
+      }
+
+      if (additionalDescriptions && additionalDescriptions.length > 0) {
+        await listingData.removeDescribingTerms(listingId);
+        await listingData.addDescribingTerms(listingId, additionalDescriptions);
+      } else {
+        await listingData.removeDescribingTerms(listingId);
       }
 
       const files = req?.files;
       if (!files || files.length < 1) {
         return res.status(200).json({
           success: true,
-          message: "Successfully updated the property!",
-          listing_id: listing_id,
+          message: 'Successfully updated the property!',
+          listingId: listingId,
         });
       }
 
       try {
-        await deleteFolder(listing_id);
+        await deleteFolder(listingId);
       } catch (error) {
+        // eslint-disable-next-line no-undef, no-console
         console.log(error);
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error!",
+          message: 'Internal Server Error!',
         });
       }
 
       const uploadedFiles = [];
       for (const file of files) {
         try {
-          const fileUrl = await uploadPhoto(file, listing_id);
+          const fileUrl = await uploadPhoto(file, listingId);
           uploadedFiles.push(fileUrl);
         } catch (error) {
+          // eslint-disable-next-line no-undef, no-console
           console.log(error);
           return res.status(500).json({
             success: false,
-            message: "Internal Server Error!",
+            message: 'Internal Server Error!',
           });
         }
       }
 
-      if (uploadedFiles.length < 1)
+      if (uploadedFiles.length < 1) {
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error!",
+          message: 'Internal Server Error!',
         });
-      await listingData.removePhotos(listing_id);
-      const photoResult = await listingData.addPhotos(
-        listing_id,
-        uploadedFiles
-      );
+      }
+      await listingData.removePhotos(listingId);
+      const photoResult = await listingData.addPhotos(listingId, uploadedFiles);
 
-      if (photoResult.affectedRows < 1)
+      if (photoResult.affectedRows < 1) {
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error!",
+          message: 'Internal Server Error!',
         });
+      }
 
       return res.status(200).json({
         success: true,
-        message: "Successfully updated the property!",
-        listing_id: listing_id,
+        message: 'Successfully updated the property!',
+        listingId: listingId,
       });
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
 
 const removeListing = async (req, res) => {
   try {
-    const listing_id = req?.params?.id;
-    if (!listing_id)
+    const listingId = req?.params?.id;
+    if (!listingId) {
       return res.status(400).json({
         success: false,
-        message: "Incomplete Information!",
+        message: 'Incomplete Information!',
       });
-    const listingResult = await listingData.removeListing(listing_id);
+    }
+    const listingResult = await listingData.removeListing(listingId);
     if (listingResult.affectedRows > 0) {
       return res.status(200).json({
         success: true,
-        message: "successfully deleted the property!",
+        message: 'successfully deleted the property!',
       });
     }
     return res.status(500).json({
-        success: false,
-        message: "Internal Server Error!",
+      success: false,
+      message: 'Internal Server Error!',
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
+    console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
 
 const getListing = async (req, res) => {
   try {
-    const listing_id = req?.params?.id;
-    if (!listing_id)
+    const listingId = req?.params?.id;
+    if (!listingId) {
       return res.status(400).json({
         success: false,
-        message: "Incomplete Information!",
-    });
+        message: 'Incomplete Information!',
+      });
+    }
 
-    const result = await listingData.getListing(listing_id);
+    const result = await listingData.getListing(listingId);
     if (result) {
       return res.status(200).json({
         success: true,
-        message: "successfully retrieved the property!",
+        message: 'successfully retrieved the property!',
         body: result,
       });
     } else {
       return res.status(200).json({
         success: false,
-        message: "No results found!",
+        message: 'No results found!',
         body: null,
       });
     }
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
 
 const setAvaliable = async (req, res) => {
   try {
-    const listing_id = req?.params?.id;
+    const listingId = req?.params?.id;
 
-    if (!listing_id)
+    if (!listingId) {
       return res.status(400).json({
         success: false,
-        message: "Incomplete Information!",
-    });
-    const result = await listingData.setAvailable(listing_id);
+        message: 'Incomplete Information!',
+      });
+    }
+    const result = await listingData.setAvailable(listingId);
     if (result.affectedRows > 0) {
       return res.status(200).json({
         success: true,
-        message: "successfully updated the property!",
+        message: 'successfully updated the property!',
       });
     }
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
 
 const setUnAvaliable = async (req, res) => {
   try {
-    const listing_id = req?.params?.id;
-    if (!listing_id)
+    const listingId = req?.params?.id;
+    if (!listingId) {
       return res.status(400).json({
         success: false,
-        message: "Incomplete Information!",
-    });
+        message: 'Incomplete Information!',
+      });
+    }
 
-    const result = await listingData.setUnAvailable(listing_id);
+    const result = await listingData.setUnAvailable(listingId);
     if (result.affectedRows > 0) {
       return res.status(200).json({
         success: true,
-        message: "successfully updated the property!",
+        message: 'successfully updated the property!',
       });
     }
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
@@ -505,15 +528,15 @@ const getPageListing = async (req, res) => {
     let filterModel = req?.query
       ? Object.fromEntries(
           Object.entries(req.query)
-            .filter(([key, value]) => Boolean(value))
+            .filter(([_, value]) => Boolean(value))
             .map(([key, value]) => {
               if (!isNaN(value)) {
                 return [key, Number(value)];
               } else if (
-                value.toLowerCase() === "true" ||
-                value.toLowerCase() === "false"
+                value.toLowerCase() === 'true' ||
+                value.toLowerCase() === 'false'
               ) {
-                return [key, value.toLowerCase() === "true"];
+                return [key, value.toLowerCase() === 'true'];
               } else {
                 return [key, value];
               }
@@ -521,11 +544,12 @@ const getPageListing = async (req, res) => {
         )
       : null;
 
-    if (!page)
+    if (!page) {
       return res.status(400).json({
         success: false,
-        message: "Incomplete Information!",
-    });
+        message: 'Incomplete Information!',
+      });
+    }
     var result = await listingData.getListingPage(page, filterModel);
 
     return res.status(200).json({
@@ -535,10 +559,11 @@ const getPageListing = async (req, res) => {
       body: result.listings,
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
@@ -548,11 +573,12 @@ const getMatchingListing = async (req, res) => {
     const page = req?.params?.page;
     const searchQuery = req?.params?.q;
 
-    if (!page)
+    if (!page) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error!",
+        message: 'Internal Server Error!',
       });
+    }
     var result = await listingData.getMatchingListing(searchQuery, page);
 
     return res.status(200).json({
@@ -562,35 +588,37 @@ const getMatchingListing = async (req, res) => {
       body: result.listings,
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
 
 const getOwnerListing = async (req, res) => {
   try {
-    const owner_id = req?.userId;
-    if (!owner_id) {
+    const ownerId = req?.userId;
+    if (!ownerId) {
       return res.status(400).json({
         success: false,
-        message: "Incomplete Information!",
+        message: 'Incomplete Information!',
       });
     }
 
-    const result = await listingData.getOwnerListing(owner_id);
+    const result = await listingData.getOwnerListing(ownerId);
     return res.status(200).json({
       success: true,
       message: `successfully loaded your listings!`,
       body: result,
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };

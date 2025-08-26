@@ -1,5 +1,5 @@
 module.exports = {
-  "ACTIVE": "active",
-  "INCATIVE": "incative",
-  "SUSPENDED": "suspended",
+  ACTIVE: 'active',
+  INCATIVE: 'incative',
+  SUSPENDED: 'suspended',
 };

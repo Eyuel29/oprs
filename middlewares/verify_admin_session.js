@@ -1,41 +1,45 @@
-const { getUserSession, deleteUserSession } = require('../queries/session_data');
-const verifyAdminSession = async (req, res, next) => {    
-    try {
-        const cookies = req?.cookies;
-        if (!cookies?.session_id){
-            res.redirect('/admin/signin');
-            return;
-        } 
-        const cookieSessionId = cookies.session_id;
-        const userSession = await getUserSession(cookieSessionId);
-        const foundUserSession = userSession[0];
-
-        if (!foundUserSession) {
-            res.clearCookie("session_id");
-            res.redirect('/admin/signin');
-            return;
-        } 
-
-        const expiresAt = parseInt(foundUserSession.expires_at);
-        const timeNow = new Date().getTime();
-        const session_expired = timeNow >= expiresAt;
-
-        if (session_expired) {
-            await deleteUserSession(foundUserSession.session_id);
-            res.clearCookie("session_id");
-            res.redirect('/admin/signin');
-            return;
-        }
-
-        req.userId = foundUserSession.user_id;
-        req.userRole = foundUserSession.user_role;
-        
-        next();
-    } catch (error) {
-        console.log(error);
-        res.redirect('/admin/signin');
-        return;
+const {
+  getUserSession,
+  deleteUserSession,
+} = require('../queries/session_data');
+const verifyAdminSession = async (req, res, next) => {
+  try {
+    const cookies = req?.cookies;
+    if (!cookies?.sessionId) {
+      res.redirect('/admin/signin');
+      return;
     }
+    const cookieSessionId = cookies.sessionId;
+    const userSession = await getUserSession(cookieSessionId);
+    const foundUserSession = userSession[0];
+
+    if (!foundUserSession) {
+      res.clearCookie('sessionId');
+      res.redirect('/admin/signin');
+      return;
+    }
+
+    const expiresAt = parseInt(foundUserSession.expiresAt);
+    const timeNow = new Date().getTime();
+    const sessionExpired = timeNow >= expiresAt;
+
+    if (sessionExpired) {
+      await deleteUserSession(foundUserSession.sessionId);
+      res.clearCookie('sessionId');
+      res.redirect('/admin/signin');
+      return;
+    }
+
+    req.userId = foundUserSession.userId;
+    req.userRole = foundUserSession.role;
+
+    next();
+  } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
+    console.log(error);
+    res.redirect('/admin/signin');
+    return;
+  }
 };
 
-module.exports = {verifyAdminSession};
+module.exports = { verifyAdminSession };

@@ -1,51 +1,52 @@
 const {
   getUserSession,
   deleteUserSession,
-} = require("../queries/session_data");
+} = require('../queries/session_data');
 
 const verifySession = async (req, res, next) => {
   try {
     const cookies = req?.cookies;
-    if (!cookies?.session_id) {
+    if (!cookies?.sessionId) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized",
+        message: 'Unauthorized',
       });
     }
-    const cookieSessionId = cookies.session_id;
+    const cookieSessionId = cookies.sessionId;
     const userSession = await getUserSession(cookieSessionId);
     const foundUserSession = userSession[0];
 
     if (!foundUserSession) {
-      res.clearCookie("session_id");
+      res.clearCookie('sessionId');
       return res.status(401).json({
         success: false,
-        message: "Unauthorized",
+        message: 'Unauthorized',
       });
     }
 
-    const expiresAt = parseInt(foundUserSession.expires_at);
+    const expiresAt = parseInt(foundUserSession.expiresAt);
     const timeNow = new Date().getTime();
-    const session_expired = timeNow >= expiresAt;
+    const sessionExpired = timeNow >= expiresAt;
 
-    if (session_expired) {
-      await deleteUserSession(foundUserSession.session_id);
-      res.clearCookie("session_id");
+    if (sessionExpired) {
+      await deleteUserSession(foundUserSession.sessionId);
+      res.clearCookie('sessionId');
       return res.status(401).json({
         success: false,
-        message: "Unauthorized",
+        message: 'Unauthorized',
       });
     }
 
-    req.userId = foundUserSession.user_id;
-    req.userRole = foundUserSession.user_role;
+    req.userId = foundUserSession.userId;
+    req.userRole = foundUserSession.role;
 
     next();
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
-        success: false,
-        message: "Internal Server Error!",
+      success: false,
+      message: 'Internal Server Error!',
     });
   }
 };

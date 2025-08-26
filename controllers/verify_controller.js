@@ -1,43 +1,44 @@
 const {
   getVerificationKey,
   createVerificationKey,
-} = require("../queries/verification_data");
-const { changeUserStatus, getUser } = require("../queries/user_data");
+} = require('../queries/verification_data');
+const { changeUserStatus, getUser } = require('../queries/user_data');
 
-const sendCodeToEmail = require("../utils/emailer");
-const accountStatus = require("../config/account_status");
-const crypto = require("crypto");
+const sendCodeToEmail = require('../utils/emailer');
+const accountStatus = require('../config/accountStatus');
+const crypto = require('crypto');
 
-const verify_post = async (req, res) => {
+const verifyPost = async (req, res) => {
+  // eslint-disable-next-line no-unsafe-optional-chaining
   const { key } = req?.params;
   const userId = req?.userId;
   if (!key || !userId) {
     return res.status(400).json({
       success: false,
-      message: "Incomplete Information!",
+      message: 'Incomplete Information!',
     });
   }
   const retrievedKey = await getVerificationKey(key);
   if (!retrievedKey[0]) {
     return res.status(400).json({
       success: false,
-      message: "Incomplete Information!",
+      message: 'Incomplete Information!',
     });
   }
 
-  if (parseInt(retrievedKey[0].expires_at) < new Date().getTime()) {
+  if (parseInt(retrievedKey[0].expiresAt) < new Date().getTime()) {
     return res.status(408).json({
       success: false,
-      message: "Key Expired, Try Again!",
+      message: 'Key Expired, Try Again!',
     });
   }
 
-  const vKeyMatches = retrievedKey[0].verification_key === parseInt(key);
+  const vKeyMatches = retrievedKey[0].verificationKey === parseInt(key);
 
   if (!vKeyMatches) {
     res.status(400).json({
       success: false,
-      message: "Verification Failed!!",
+      message: 'Verification Failed!!',
     });
   }
 
@@ -46,31 +47,33 @@ const verify_post = async (req, res) => {
     if (result.affectedRows > 0) {
       return res.status(200).json({
         success: true,
-        message: "Registration successful!",
+        message: 'Registration successful!',
       });
     } else {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error!",
+        message: 'Internal Server Error!',
       });
     }
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
 
-const verify_get = async (req, res) => {
+const verifyGet = async (req, res) => {
   try {
     const userId = req?.userId;
-    if (!userId)
+    if (!userId) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized!",
+        message: 'Unauthorized!',
       });
+    }
     const userData = await getUser(userId);
     const { email } = userData;
 
@@ -79,21 +82,22 @@ const verify_get = async (req, res) => {
     await createVerificationKey(
       userId,
       randomCode,
-      "" + new Date().getTime(),
-      "" + (new Date().getTime() + 60000 * 5)
+      '' + new Date().getTime(),
+      '' + (new Date().getTime() + 60000 * 5)
     );
 
     return res.status(200).json({
       success: true,
-      message: "Verification code sent to " + email,
+      message: 'Verification code sent to ' + email,
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
 
-module.exports = { verify_post, verify_get };
+module.exports = { verifyPost, verifyGet };

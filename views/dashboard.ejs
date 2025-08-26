@@ -79,18 +79,18 @@
                 data.length < 1 ? table += `<tr><td colspan="13">No Data</td></tr>` :
                 data.forEach(user => {
                     table += `<tr>
-                        <td>${user.user_id}</td>
-                        <td>${user.full_name}</td>
-                        <td>${user.user_role == 1000 ? "Tenant" : user.user_role == 2000 ? "Owner" : "Admin"}</td>
-                        <td>${user.job_type}</td>
+                        <td>${user.userId}</td>
+                        <td>${user.fullName}</td>
+                        <td>${user.role == 'tenant' ? "Tenant" : user.role == 'owner' ? "Owner" : "Admin"}</td>
+                        <td>${user.jobType}</td>
                         <td>${user.email}</td>
-                        <td>${user.phone_number}</td>
+                        <td>${user.phoneNumber}</td>
                         <td>${user.gender}</td>
                         <td>${user.region}</td>
                         <td>${user.zone}</td>
                         <td>${user.woreda}</td>
-                        <td>${new Date(user.date_joined).toLocaleString()}</td>
-                        <td>${user.account_status == 1000 ? "Suspended" : user.user_role == 2000 ? "Not Verified" : "Verified"}</td>
+                        <td>${new Date(user.dateJoined).toLocaleString()}</td>
+                        <td>${user.accountStatus == 'suspended' ? "Suspended" : user.role == 'inactive' ? "Not Verified" : "Verified"}</td>
                         <td>${user.married ? "Yes" : "No"}</td>
                     </tr>`;
                 });
@@ -136,24 +136,24 @@
                 data.length < 1 ? table += `<tr><td colspan="39">No Data</td></tr>` :
                 data.forEach(listing => {
                     table += `<tr>
-                    <td>${listing.listing_id}</td>
-                    <td>${listing.owner_id}</td>
+                    <td>${listing.listingId}</td>
+                    <td>${listing.ownerId}</td>
                     <td>${listing.owner}</td>
                     <td>${listing.type}</td>
                     <td>${listing.title}</td>
                     <td>${listing.description}</td>
-                    <td>${listing.sub_city}</td>
+                    <td>${listing.subCity}</td>
                     <td>${listing.woreda}</td>
-                    <td>${listing.area_name}</td>
-                    <td>${listing.price_per_duration}</td>
-                    <td>${listing.payment_currency}</td>
-                    <td>${listing.total_area_square_meter}</td>
-                    <td>${listing.listing_status == 1000 ? "Not Available" : "Available"}</td>
+                    <td>${listing.areaName}</td>
+                    <td>${listing.pricePerDuration}</td>
+                    <td>${listing.paymentCurrency}</td>
+                    <td>${listing.totalAreaSquareMeter}</td>
+                    <td>${listing.listingStatus == 'inactive' ? "Not Available" : "Available"}</td>
                     <td>${listing.views}</td>
-                    <td>${listing.parking_capacity}</td>
-                    <td>${listing.number_of_floors}</td>
-                    <td>${new Date(listing.created_at).toLocaleString()}</td>
-                    <td>${new Date(listing.updated_at).toLocaleString()}</td>
+                    <td>${listing.parkingCapacity}</td>
+                    <td>${listing.numberOfFloors}</td>
+                    <td>${new Date(listing.createdAt).toLocaleString()}</td>
+                    <td>${new Date(listing.updatedAt).toLocaleString()}</td>
                 </tr>`;
             });
             table += '</table>';
@@ -196,18 +196,18 @@
                     data.forEach(reservation => {
                         table += `
                         <tr>
-                            <td>${reservation.reservation_id}</td>
-                            <td>${reservation.owner_id}</td>
-                            <td>${reservation.tenant.full_name}</td>
-                            <td>${reservation.tenant.phone_number}</td>
+                            <td>${reservation.reservationId}</td>
+                            <td>${reservation.ownerId}</td>
+                            <td>${reservation.tenant.fullName}</td>
+                            <td>${reservation.tenant.phoneNumber}</td>
                             <td>${reservation.listing_title}</td>
                             <td>${reservation.description}</td>
-                            <td>${reservation.lease_duration_days}</td>
-                            <td>${reservation.price_offer}</td>
-                            <td>${reservation.selected_payment_method}</td>
+                            <td>${reservation.leaseDurationDays}</td>
+                            <td>${reservation.priceOffer}</td>
+                            <td>${reservation.selectedPaymentMethod}</td>
                             <td>${reservation.status}</td>
-                            <td>${new Date(reservation.created_at).toLocaleString()}</td>
-                            <td>${new Date(reservation.updated_at).toLocaleString()}</td>
+                            <td>${new Date(reservation.createdAt).toLocaleString()}</td>
+                            <td>${new Date(reservation.updatedAt).toLocaleString()}</td>
                         </tr>`;
                     });
                 }
@@ -261,10 +261,10 @@
                         table += `
                         <tr>
                             <td>${payment.id}</td>
-                            <td>${payment.tenant_id}</td>
-                            <td>${payment.owner_id}</td>
-                            <td>${payment.first_name}</td>
-                            <td>${payment.last_name}</td>
+                            <td>${payment.tenantId}</td>
+                            <td>${payment.ownerId}</td>
+                            <td>${payment.firstName}</td>
+                            <td>${payment.lastName}</td>
                             <td>${payment.email}</td>
                             <td>${payment.currency}</td>
                             <td>${payment.amount}</td>
@@ -273,12 +273,12 @@
                             <td>${payment.method}</td>
                             <td>${payment.type}</td>
                             <td>${payment.status}</td>
-                            <td>${payment.tx_ref}</td>
+                            <td>${payment.txref}</td>
                             <td>${payment.reference}</td>
                             <td>${payment.title}</td>
                             <td>${payment.description}</td>
-                            <td>${payment.created_at}</td>
-                            <td>${payment.updated_at}</td>
+                            <td>${payment.createdAt}</td>
+                            <td>${payment.updatedAt}</td>
                         </tr>`;
                     });
                 }

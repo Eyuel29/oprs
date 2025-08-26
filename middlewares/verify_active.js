@@ -1,47 +1,48 @@
-const { getUserStatus } = require("../queries/user_data");
-
+const { getUserStatus } = require('../queries/user_data');
 
 const verifyActive = async (req, res, next) => {
   try {
-    if (!req?.userId)
+    if (!req?.userId) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized!",
+        message: 'Unauthorized!',
       });
+    }
     const userId = req?.userId;
     const result = await getUserStatus(userId);
 
-    if (!result[0])
+    if (!result[0]) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error!",
+        message: 'Internal Server Error!',
       });
-    switch (result[0].account_status) {
-      case 1000:
+    }
+    switch (result[0].accountStatus) {
+      case 'suspended':
         return res.status(403).json({
           success: false,
-          message: "Please verify your acccount!",
+          message: 'Your account has been suspended!',
         });
-      case 2000:
+      case 'inactive':
         return res.status(403).json({
           success: false,
-          message: "Your account has been suspended!",
+          message: 'Please verify your acccount!',
         });
-      case 3000:
+      case 'active':
         next();
         break;
       default:
         return res.status(403).json({
           success: false,
-          message: "Forbidden!",
+          message: 'Forbidden!',
         });
-        break;
     }
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };

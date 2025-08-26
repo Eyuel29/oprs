@@ -1,121 +1,128 @@
-const reservationData = require("../queries/reservation_data");
-const notificationData = require("../queries/notification_data");
-const agreementData = require("../queries/agreement_data");
-const listingData = require("../queries/listing_data");
+/* eslint-disable no-unsafe-optional-chaining */
+const reservationData = require('../queries/reservation_data');
+const notificationData = require('../queries/notification_data');
+const agreementData = require('../queries/agreement_data');
+const listingData = require('../queries/listing_data');
 
-const { getDate } = require("../utils/date");
-const notificationTypes = require("../config/notification_types");
+const { getDate } = require('../utils/date');
+const notificationTypes = require('../config/notification_types');
 
 const requestReservation = async (req, res) => {
   try {
     if (
-      !req?.body?.owner_id ||
-      !req?.body?.listing_id ||
-      !req?.body?.selected_payment_method ||
-      !req?.body?.tenant_name ||
-      !req?.body?.additional_message ||
-      !req?.body?.stay_dates
-    )
+      !req?.body?.ownerId ||
+      !req?.body?.listingId ||
+      !req?.body?.selectedPaymentMethod ||
+      !req?.body?.tenantName ||
+      !req?.body?.additionalMessage ||
+      !req?.body?.stayDates
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Incomplete Information!",
+        message: 'Incomplete Information!',
       });
-    const tenant_id = req?.userId;
+    }
+    const tenantId = req?.userId;
     const {
-      owner_id,
-      listing_id,
-      tenant_name,
-      selected_payment_method,
-      additional_message,
+      ownerId,
+      listingId,
+      tenantName,
+      selectedPaymentMethod,
+      additionalMessage,
     } = req?.body;
-    const price_offer = 0;
+    const priceOffer = 0;
     const date = getDate();
 
-    const stay_dates =
-      typeof req?.body?.stay_dates === "string"
-        ? JSON.parse(req?.body?.stay_dates)
-        : typeof req?.body?.stay_dates === "object"
-        ? Array.from(req?.body?.stay_dates)
-        : [];
+    const stayDates =
+      typeof req?.body?.stayDates === 'string'
+        ? JSON.parse(req?.body?.stayDates)
+        : typeof req?.body?.stayDates === 'object'
+          ? Array.from(req?.body?.stayDates)
+          : [];
 
-    if (!stay_dates)
+    if (!stayDates) {
       return res.status(400).json({
         success: false,
-        message: "Incomplete Information!",
+        message: 'Incomplete Information!',
       });
+    }
 
     const reservationResult = await reservationData.createRequest({
-      tenant_id,
-      owner_id,
-      tenant_name,
-      listing_id,
-      selected_payment_method,
+      tenantId,
+      ownerId,
+      tenantName,
+      listingId,
+      selectedPaymentMethod,
       date,
-      price_offer,
-      stay_dates,
-      additional_message,
+      priceOffer,
+      stayDates,
+      additionalMessage,
     });
 
-    if (reservationResult.affectedRows < 1)
+    if (reservationResult.affectedRows < 1) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error!",
+        message: 'Internal Server Error!',
       });
+    }
 
-    const reservation_id = reservationResult.insertId;
+    const reservationId = reservationResult.insertId;
     await notificationData.createNotification(
-      tenant_id,
-      owner_id,
+      tenantId,
+      ownerId,
       notificationTypes.EVENT,
-      "New Reservation!",
-      "Some one is interested in your listing!",
+      'New Reservation!',
+      'Some one is interested in your listing!',
       getDate()
     );
 
     return res.status(201).json({
       success: true,
-      message: "Successfully made a reservation request!",
-      reservation_id: reservation_id,
+      message: 'Successfully made a reservation request!',
+      reservationId: reservationId,
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
 
 const cancelReservation = async (req, res) => {
   try {
-    if (!req?.params?.id)
+    if (!req?.params?.id) {
       return res.status(400).json({
         success: false,
-        message: "Incomplete Information!",
+        message: 'Incomplete Information!',
       });
+    }
 
-    const reservation_id = req?.params?.id;
-    const tenant_id = req?.userId;
+    const reservationId = req?.params?.id;
+    const tenantId = req?.userId;
     const result = await reservationData.cancelReservation(
-      tenant_id,
-      reservation_id
+      tenantId,
+      reservationId
     );
 
     if (result.affectedRows > 0) {
       return res.status(200).json({
         success: true,
-        message: "successfully cancelled the reservaiton request!",
+        message: 'successfully cancelled the reservaiton request!',
       });
     }
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
@@ -125,168 +132,170 @@ const approveReservationRequest = async (req, res) => {
     if (!req?.params?.id) {
       return res.status(400).json({
         success: false,
-        message: "Incomplete Information!",
+        message: 'Incomplete Information!',
       });
     }
 
-    const reservation_id = req?.params?.id;
-    const owner_id = req?.userId;
+    const reservationId = req?.params?.id;
+    const ownerId = req?.userId;
     const result = await reservationData.appoveReservation(
-      owner_id,
-      reservation_id
+      ownerId,
+      reservationId
     );
 
     if (result.affectedRows < 1) {
       return res.status(400).json({
         success: false,
-        message: "Incomplete Information!",
+        message: 'Incomplete Information!',
       });
     }
 
     const reservation = await reservationData.getReservation(
-      owner_id,
-      reservation_id
+      ownerId,
+      reservationId
     );
-    const listing = await listingData.getListing(reservation.listing_id);
+    const listing = await listingData.getListing(reservation.listingId);
 
     const agreement = {
-      tenant_id: reservation.tenant_id,
-      owner_id: owner_id,
-      listing_id: reservation.listing_id,
+      tenantId: reservation.tenantId,
+      ownerId: ownerId,
+      listingId: reservation.listingId,
     };
 
-    const lease_duration = listing.lease_duration_days;
-    const check_in_date = reservation.stay_dates[0] ?? new Date().toISOString();
+    const leaseDuration = listing.leaseDurationDays;
+    const checkInDate = reservation.stayDates[0] ?? new Date().toISOString();
 
-    await agreementData.createAgreement(
-      agreement,
-      lease_duration,
-      check_in_date
-    );
-    await listingData.setUnAvailable(listing.listing_id);
+    await agreementData.createAgreement(agreement, leaseDuration, checkInDate);
+    await listingData.setUnAvailable(listing.listingId);
 
     await notificationData.createNotification(
-      owner_id,
-      reservation.tenant_id,
+      ownerId,
+      reservation.tenantId,
       notificationTypes.APPROVE,
-      "Reservation approved!",
-      "Contact the owner for more details, you can use our app to make your payments.",
+      'Reservation approved!',
+      'Contact the owner for more details, you can use our app to make your payments.',
       getDate()
     );
 
     return res.status(200).json({
       success: true,
-      message: "successfully approved the reservation request!",
+      message: 'successfully approved the reservation request!',
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
 
 const declineReservationRequest = async (req, res) => {
   try {
-    if (!req?.params?.id)
+    if (!req?.params?.id) {
       return res.status(400).json({
         success: false,
-        message: "Incomplete Information!",
+        message: 'Incomplete Information!',
       });
-    const reservation_id = req?.params?.id;
-    const owner_id = req?.userId;
+    }
+    const reservationId = req?.params?.id;
+    const ownerId = req?.userId;
     const result = await reservationData.declineReservation(
-      owner_id,
-      reservation_id
+      ownerId,
+      reservationId
     );
     if (result.affectedRows < 1) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error!",
+        message: 'Internal Server Error!',
       });
     }
     const reservation = await reservationData.getReservation(
-      owner_id,
-      reservation_id
+      ownerId,
+      reservationId
     );
 
     await notificationData.createNotification(
-      reservation.tenant_id,
-      owner_id,
+      reservation.tenantId,
+      ownerId,
       notificationTypes.DECLINE,
-      "Reservation declined!",
-      "Your reservation has been declined!",
+      'Reservation declined!',
+      'Your reservation has been declined!',
       getDate()
     );
 
     return res.status(200).json({
       success: true,
-      message: "Reservation declined!",
+      message: 'Reservation declined!',
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
 
 const getReservations = async (req, res) => {
   try {
-    const owner_id = req?.userId;
-    const result = await reservationData.getReservations(owner_id);
+    const ownerId = req?.userId;
+    const result = await reservationData.getReservations(ownerId);
     return res.status(200).json({
       success: true,
-      message: "Successfully loaded requests!",
+      message: 'Successfully loaded requests!',
       body: result,
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
 
 const getTenantReservations = async (req, res) => {
   try {
-    const tenant_id = req?.userId;
-    const result = await reservationData.getReservations(tenant_id);
-    console.log(result);
+    const tenantId = req?.userId;
+    const result = await reservationData.getReservations(tenantId);
 
     return res.status(200).json({
       success: true,
-      message: "Successfully loaded your requests!",
+      message: 'Successfully loaded your requests!',
       body: result,
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
 
 const getAgreements = async (req, res) => {
   try {
-    const user_id = req?.params.id;
-    if (!user_id)
+    const userId = req?.params.id;
+    if (!userId) {
       return res.status(400).json({
         success: false,
-        message: "Incomplete Information!",
+        message: 'Incomplete Information!',
       });
+    }
 
-    const result = await agreementData.getAgreements(user_id);
+    const result = await agreementData.getAgreements(userId);
 
-    if (!result)
+    if (!result) {
       return res.status(404).json({
         success: false,
-        message: "No agreements found!",
+        message: 'No agreements found!',
       });
+    }
 
     return res.status(200).json({
       success: true,
@@ -294,10 +303,11 @@ const getAgreements = async (req, res) => {
       body: result,
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };

@@ -1,35 +1,37 @@
-const { getDate } = require("../utils/date");
-const reviewData = require("../queries/review_data");
-const { getUser } = require("../queries/user_data");
-
+/* eslint-disable no-unsafe-optional-chaining */
+const reviewData = require('../queries/review_data');
+const { getUser } = require('../queries/user_data');
 
 const deleteReview = async (req, res) => {
   try {
-    if (!req?.userId || !req?.params?.id)
+    if (!req?.userId || !req?.params?.id) {
       return res.status(400).json({
         success: false,
-        message: "Incomplete Information!",
+        message: 'Incomplete Information!',
       });
+    }
 
-    const author_id = req?.userId;
-    const review_id = req?.params?.id;
-    const reviewResult = await reviewData.deleteReview(author_id, review_id);
+    const authorId = req?.userId;
+    const reviewId = req?.params?.id;
+    const reviewResult = await reviewData.deleteReview(authorId, reviewId);
 
-    if (reviewResult.affectedRows < 1)
+    if (reviewResult.affectedRows < 1) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error!",
+        message: 'Internal Server Error!',
       });
+    }
 
     return res.status(200).json({
       success: true,
-      message: "Successfully deleted the review!",
+      message: 'Successfully deleted the review!',
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
@@ -39,70 +41,75 @@ const getUserReviews = async (req, res) => {
     if (!req?.params?.id) {
       return res.status(400).json({
         success: false,
-        message: "Incomplete Information!",
-    });
+        message: 'Incomplete Information!',
+      });
     }
-    const user_id = req?.params?.id;
+    const userId = req?.params?.id;
 
-    const reviewResult = await reviewData.getUserReviews(user_id);
+    const reviewResult = await reviewData.getUserReviews(userId);
     return res.status(200).json({
       success: true,
-      message: "Successfully loaded Reviews!",
+      message: 'Successfully loaded Reviews!',
       body: reviewResult,
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
 
 const getMyReviews = async (req, res) => {
   try {
-    if (!req?.userId)
+    if (!req?.userId) {
       return res.status(400).json({
         success: false,
-        message: "Incomplete Information!",
-    });
-    const user_id = req?.userId;
-    const reviewResult = await reviewData.getUserReviews(user_id);
+        message: 'Incomplete Information!',
+      });
+    }
+    const userId = req?.userId;
+    const reviewResult = await reviewData.getUserReviews(userId);
 
     return res.status(200).json({
       success: true,
-      message: "Successfully loaded Reviews!",
+      message: 'Successfully loaded Reviews!',
       body: reviewResult,
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
 
 const getListingReviews = async (req, res) => {
   try {
-    if (!req?.params?.id)
+    if (!req?.params?.id) {
       return res.status(400).json({
         success: false,
-        message: "Incomplete Information!",
-    });
-    const listing_id = req?.params?.id;
-    const reviewResult = await reviewData.getListingReviews(listing_id);
+        message: 'Incomplete Information!',
+      });
+    }
+    const listingId = req?.params?.id;
+    const reviewResult = await reviewData.getListingReviews(listingId);
 
     return res.status(200).json({
       success: true,
-      message: "Successfully loaded Reviews!",
+      message: 'Successfully loaded Reviews!',
       body: reviewResult,
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };
@@ -110,54 +117,55 @@ const getListingReviews = async (req, res) => {
 const createReview = async (req, res) => {
   try {
     if (
-      !req?.body?.review_message ||
+      !req?.body?.reviewMessage ||
       !req?.body?.rating ||
-      !req?.body?.receiver_id ||
-      !req?.body?.author_name
-    )
+      !req?.body?.receiverId ||
+      !req?.body?.authorName
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Incomplete Information!",
-    });
+        message: 'Incomplete Information!',
+      });
+    }
 
-    const author_id = req?.userId;
-    const {
-      review_message,
-      rating,
-      reviewed_listing_id,
-      author_name,
-      receiver_id,
-    } = req?.body;
+    const authorId = req?.userId;
+    const { reviewMessage, rating, reviewedListingId, authorName, receiverId } =
+      req?.body;
 
-    const userToReview = await getUser(receiver_id);
-    if (userToReview.user_id == author_id) return res.status(403).json({
+    const userToReview = await getUser(receiverId);
+    if (userToReview.userId === authorId) {
+      return res.status(403).json({
         success: false,
-        message: "Forbidden!",
-    });
+        message: 'Forbidden!',
+      });
+    }
 
     const reviewResult = await reviewData.createReview({
-      author_id,
-      review_message,
+      authorId,
+      reviewMessage,
       rating,
-      author_name,
-      receiver_id,
-      reviewed_listing_id,
+      authorName,
+      receiverId,
+      reviewedListingId,
     });
 
-    if (reviewResult.affectedRows < 1) return res.status(500).json({
+    if (reviewResult.affectedRows < 1) {
+      return res.status(500).json({
         success: false,
-        message: "Internal Server Error!",
-    });
+        message: 'Internal Server Error!',
+      });
+    }
 
     return res.status(200).json({
       success: true,
-      message: "Review successfully sent!",
+      message: 'Review successfully sent!',
     });
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error!",
+      message: 'Internal Server Error!',
     });
   }
 };

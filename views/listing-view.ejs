@@ -54,11 +54,11 @@
                     <div class="user-card-body">
                    <div>
                     <b><p>  Listing id</p></b> :
-                   <b><p>${listing.listing_id}</p></b>
+                   <b><p>${listing.listingId}</p></b>
                     </div>
                    <div>
                     <p>  Owner id   </p> :
-                   <p>${listing.owner_id}</p>
+                   <p>${listing.ownerId}</p>
                     </div>
                    <div>
                     <p>  Owner   </p> :
@@ -69,8 +69,8 @@
                    <p>${listing.type}</p>
                     </div>
                    <div>
-                    <p>  Sub_city   </p> :
-                   <p>${listing.sub_city}</p>
+                    <p>  subCity   </p> :
+                   <p>${listing.subCity}</p>
                     </div>
                    <div>
                     <p>  Woreda   </p> :
@@ -78,23 +78,23 @@
                     </div>
                    <div>
                     <p>  Area name   </p> :
-                   <p>${listing.area_name}</p>
+                   <p>${listing.areaName}</p>
                     </div>
                    <div>
                     <p>  Price per duration   </p> :
-                   <p>${listing.price_per_duration}</p>
+                   <p>${listing.pricePerDuration}</p>
                     </div>
                    <div>
                     <p>  Payment currency   </p> :
-                   <p>${listing.payment_currency}</p>
+                   <p>${listing.paymentCurrency}</p>
                     </div>
                    <div>
                     <p>  Total area square_meter   </p> :
-                   <p>${listing.total_area_square_meter}</p>
+                   <p>${listing.totalAreaSquareMeter}</p>
                     </div>
                    <div>
                     <p>  Listing status   </p> :
-                   <p>${listing.listing_status == 1000 ? "Not Available" : "Available"}</p>
+                   <p>${listing.listingStatus == 'inactive' ? "Not Available" : "Available"}</p>
                     </div>
                    <div>
                     <p>  Views   </p> :
@@ -102,23 +102,23 @@
                     </div>
                    <div>
                     <p>  Parking capacity   </p> :
-                   <p>${listing.parking_capacity}</p>
+                   <p>${listing.parkingCapacity}</p>
                     </div>
                    <div>
                     <p>  Number of floors   </p> :
-                   <p>${listing.number_of_floors}</p>
+                   <p>${listing.numberOfFloors}</p>
                     </div>
                    <div>
                     <p>Created At</p> :
-                   <p>${new Date(listing.created_at).toLocaleString()}</p>
+                   <p>${new Date(listing.createdAt).toLocaleString()}</p>
                     </div>
                    <div>
                     <p>Updated At</p> :
-                   <p>${new Date(listing.updated_at).toLocaleString()}</p>
+                   <p>${new Date(listing.updatedAt).toLocaleString()}</p>
                     </div>
                     </div>
                     <div class="user-card-footer">
-                        <button onClick="deleteListing(${listing.listing_id})" class="btn delete-btn">Delete Listing</button>
+                        <button onClick="deleteListing(${listing.listingId})" class="btn delete-btn">Delete Listing</button>
                     </div>
                 </div>
                 `;
