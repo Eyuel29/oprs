@@ -1,5 +1,9 @@
+/* eslint-disable no-console */
+/* eslint-disable no-undef */
 /* eslint-disable no-unsafe-optional-chaining */
+
 const listingData = require('../queries/listing_data');
+
 const {
   handleFileUpload,
   uploadPhoto,
@@ -151,7 +155,6 @@ const createListing = async (req, res) => {
           const fileUrl = await uploadPhoto(file, listingId);
           uploadedFiles.push(fileUrl);
         } catch (error) {
-          // eslint-disable-next-line no-undef, no-console
           console.log(error);
           return res.status(500).json({
             success: false,
@@ -181,7 +184,6 @@ const createListing = async (req, res) => {
       });
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -340,7 +342,6 @@ const modifyListing = async (req, res) => {
       try {
         await deleteFolder(listingId);
       } catch (error) {
-        // eslint-disable-next-line no-undef, no-console
         console.log(error);
         return res.status(500).json({
           success: false,
@@ -354,7 +355,6 @@ const modifyListing = async (req, res) => {
           const fileUrl = await uploadPhoto(file, listingId);
           uploadedFiles.push(fileUrl);
         } catch (error) {
-          // eslint-disable-next-line no-undef, no-console
           console.log(error);
           return res.status(500).json({
             success: false,
@@ -386,7 +386,6 @@ const modifyListing = async (req, res) => {
       });
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -416,7 +415,6 @@ const removeListing = async (req, res) => {
       message: 'Internal Server Error!',
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -450,7 +448,6 @@ const getListing = async (req, res) => {
       });
     }
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -481,7 +478,6 @@ const setAvaliable = async (req, res) => {
       message: 'Internal Server Error!',
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -512,7 +508,6 @@ const setUnAvaliable = async (req, res) => {
       message: 'Internal Server Error!',
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -559,7 +554,6 @@ const getPageListing = async (req, res) => {
       body: result.listings,
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -588,7 +582,6 @@ const getMatchingListing = async (req, res) => {
       body: result.listings,
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -614,7 +607,6 @@ const getOwnerListing = async (req, res) => {
       body: result,
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,

@@ -1,8 +1,8 @@
 const router = require('express').Router();
-const verifyRoles = require('../middlewares/verify_roles');
+const verifyRoles = require('../middlewares/verify_role');
 const Roles = require('../config/roles');
-const listingController = require('../controllers/listing_controller');
-const { verifySession } = require('../middlewares/verify_user_session');
+const listingController = require('../controllers/controller.listing');
+const { verifySession } = require('../middlewares/verify_session');
 
 router.post(
   '/create',

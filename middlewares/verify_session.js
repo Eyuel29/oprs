@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable no-undef */
 const {
   getUserSession,
   deleteUserSession,
@@ -42,7 +44,6 @@ const verifySession = async (req, res, next) => {
 
     next();
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,

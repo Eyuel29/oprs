@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-console */
 /* eslint-disable no-unsafe-optional-chaining */
 const reservationData = require('../queries/reservation_data');
 const notificationData = require('../queries/notification_data');
@@ -82,7 +84,6 @@ const requestReservation = async (req, res) => {
       reservationId: reservationId,
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -118,7 +119,6 @@ const cancelReservation = async (req, res) => {
       message: 'Internal Server Error!',
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -182,7 +182,6 @@ const approveReservationRequest = async (req, res) => {
       message: 'successfully approved the reservation request!',
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -230,7 +229,6 @@ const declineReservationRequest = async (req, res) => {
       message: 'Reservation declined!',
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -249,7 +247,6 @@ const getReservations = async (req, res) => {
       body: result,
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -269,7 +266,6 @@ const getTenantReservations = async (req, res) => {
       body: result,
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -303,7 +299,6 @@ const getAgreements = async (req, res) => {
       body: result,
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,

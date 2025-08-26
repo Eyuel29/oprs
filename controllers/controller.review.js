@@ -1,5 +1,8 @@
 /* eslint-disable no-unsafe-optional-chaining */
+/* eslint-disable no-undef */
+/* eslint-disable no-console */
 const reviewData = require('../queries/review_data');
+const agreementData = require('../queries/agreement_data');
 const { getUser } = require('../queries/user_data');
 
 const deleteReview = async (req, res) => {
@@ -27,7 +30,6 @@ const deleteReview = async (req, res) => {
       message: 'Successfully deleted the review!',
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -53,7 +55,6 @@ const getUserReviews = async (req, res) => {
       body: reviewResult,
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -79,7 +80,6 @@ const getMyReviews = async (req, res) => {
       body: reviewResult,
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -105,7 +105,6 @@ const getListingReviews = async (req, res) => {
       body: reviewResult,
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -129,8 +128,16 @@ const createReview = async (req, res) => {
     }
 
     const authorId = req?.userId;
-    const { reviewMessage, rating, reviewedListingId, authorName, receiverId } =
-      req?.body;
+
+    const reservationCount = await agreementData.getAgreements(authorId);
+    if (reservationCount < 1) {
+      return res.status(403).json({
+        success: false,
+        message: 'You need to have an accepted reservation to give reviews!',
+      });
+    }
+
+    const { reviewMessage, rating, reviewedListingId, authorName, receiverId } = req?.body;
 
     const userToReview = await getUser(receiverId);
     if (userToReview.userId === authorId) {
@@ -161,7 +168,6 @@ const createReview = async (req, res) => {
       message: 'Review successfully sent!',
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,

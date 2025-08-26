@@ -1,3 +1,6 @@
+/* eslint-disable no-console */
+/* eslint-disable no-undef */
+const accountStatus = require('../config/account_status');
 const { getUserStatus } = require('../queries/user_data');
 
 const verifyActive = async (req, res, next) => {
@@ -8,27 +11,34 @@ const verifyActive = async (req, res, next) => {
         message: 'Unauthorized!',
       });
     }
+
     const userId = req?.userId;
     const result = await getUserStatus(userId);
 
     if (!result[0]) {
-      return res.status(500).json({
+      res.clearCookie('sessionId', {
+        httpOnly: true,
+        sameSite: 'None',
+        secure: true,
+      });
+
+      return res.status(401).json({
         success: false,
-        message: 'Internal Server Error!',
+        message: 'Unauthorized!',
       });
     }
     switch (result[0].accountStatus) {
-      case 'suspended':
+      case accountStatus.SUSPENDED:
         return res.status(403).json({
           success: false,
           message: 'Your account has been suspended!',
         });
-      case 'inactive':
+      case accountStatus.INCATIVE:
         return res.status(403).json({
           success: false,
           message: 'Please verify your acccount!',
         });
-      case 'active':
+      case accountStatus.ACTIVE:
         next();
         break;
       default:
@@ -38,7 +48,6 @@ const verifyActive = async (req, res, next) => {
         });
     }
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,

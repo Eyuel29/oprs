@@ -1,3 +1,6 @@
+/* eslint-disable no-console */
+/* eslint-disable no-undef */
+
 const {
   getUserSession,
   deleteUserSession,
@@ -35,7 +38,6 @@ const verifyAdminSession = async (req, res, next) => {
 
     next();
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     res.redirect('/admin/signin');
     return;

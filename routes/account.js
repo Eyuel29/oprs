@@ -1,7 +1,7 @@
 const router = require('express').Router();
-const verifyController = require('../controllers/verify_controller');
-const accountController = require('../controllers/account_controller');
-const { verifySession } = require('../middlewares/verify_user_session');
+const verifyController = require('../controllers/controller.verify');
+const accountController = require('../controllers/controller.account');
+const { verifySession } = require('../middlewares/verify_session');
 
 router.post('/restore', accountController.restoreAccount);
 router.post(

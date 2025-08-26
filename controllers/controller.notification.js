@@ -1,12 +1,15 @@
+/* eslint-disable no-console */
+/* eslint-disable no-undef */
 const notificationData = require('../queries/notification_data');
 
 const getUserNotifications = async (req, res) => {
   try {
-    if (!req?.userId)
+    if (!req?.userId) {
       return res.status(400).json({
         success: false,
         message: 'Incomplete Information!',
       });
+    }
     const userId = req?.userId;
     const notificationResult = await notificationData.getNotifications(userId);
     return res.status(200).json({
@@ -25,11 +28,12 @@ const getUserNotifications = async (req, res) => {
 
 const getNotificationCount = async (req, res) => {
   try {
-    if (!req?.userId)
+    if (!req?.userId) {
       return res.status(400).json({
         success: false,
         message: 'Incomplete Information!',
       });
+    }
     const userId = req?.userId;
     const notificationCount =
       await notificationData.getNotificationCount(userId);

@@ -1,10 +1,10 @@
 const router = require('express').Router();
-const verifyRoles = require('../middlewares/verify_roles');
+const verifyRoles = require('../middlewares/verify_role');
 const Roles = require('../config/roles');
-const paymentController = require('../controllers/payment_controller');
+const paymentController = require('../controllers/controller.payment');
 const paymentData = require('../queries/payment_data');
-const { verifySession } = require('../middlewares/verify_user_session');
-const verifyActive = require('../middlewares/verify_active');
+const { verifySession } = require('../middlewares/verify_session');
+const verifyActive = require('../middlewares/verify_status');
 
 router.get(
   '/getSubAccount/:id',

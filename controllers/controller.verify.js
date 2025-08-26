@@ -1,3 +1,6 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-console */
+
 const {
   getVerificationKey,
   createVerificationKey,
@@ -56,7 +59,6 @@ const verifyPost = async (req, res) => {
       });
     }
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -91,7 +93,6 @@ const verifyGet = async (req, res) => {
       message: 'Verification code sent to ' + email,
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,

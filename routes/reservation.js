@@ -1,8 +1,8 @@
 const router = require('express').Router();
 const Roles = require('../config/roles');
-const reservationController = require('../controllers/reservation_controller');
-const verifyRoles = require('../middlewares/verify_roles');
-const { verifySession } = require('../middlewares/verify_user_session');
+const reservationController = require('../controllers/controller.reservation');
+const verifyRoles = require('../middlewares/verify_role');
+const { verifySession } = require('../middlewares/verify_session');
 const { getReservationsReports } = require('../queries/reservation_data');
 
 router.get(

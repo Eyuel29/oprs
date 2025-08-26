@@ -1,8 +1,8 @@
 const router = require('express').Router();
-const verifyRoles = require('../middlewares/verify_roles');
+const verifyRoles = require('../middlewares/verify_role');
 const Roles = require('../config/roles');
-const reviewController = require('../controllers/review_controller');
-const { verifySession } = require('../middlewares/verify_user_session');
+const reviewController = require('../controllers/controller.review');
+const { verifySession } = require('../middlewares/verify_session');
 const verifyReviewEligible = require('../middlewares/verify_review_eligible');
 
 router.get(

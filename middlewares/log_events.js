@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable no-undef */
 const { format } = require('date-fns');
 const { v4: uuid } = require('uuid');
 
@@ -15,7 +17,6 @@ const logEvents = async (message, logName) => {
     }
     await fsPromises.appendFile(path.join(__dirname, 'logs', logName), logItem);
   } catch (err) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(err);
   }
 };

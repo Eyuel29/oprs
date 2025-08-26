@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-console */
 /* eslint-disable camelcase */
 /* eslint-disable no-unsafe-optional-chaining */
 const notificationData = require('../queries/notification_data');
@@ -39,7 +41,6 @@ const deleteSubAccount = async (req, res) => {
       message: 'Your sub-account has been deleted!',
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -71,7 +72,6 @@ const getPaymentInfo = async (req, res) => {
       message: 'Successfully retrieved payment informtion!',
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -104,7 +104,6 @@ const getMyPaymentInfo = async (req, res) => {
       message: 'Successfully retrieved payment informtion!',
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -179,7 +178,6 @@ const createSubAccount = async (req, res) => {
       message: 'Sub-account created successfully!',
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -274,7 +272,6 @@ const initialize = async (req, res) => {
       message: 'Use this link for checkout!',
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -356,7 +353,6 @@ const verifyPayment = async (req, res) => {
       body: null,
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,

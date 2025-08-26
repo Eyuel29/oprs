@@ -3,7 +3,7 @@ const pool = require('../config/db');
 const path = require('path');
 const storage = require('../config/firebase_config');
 const { ref, uploadBytes } = require('firebase/storage');
-const verifyRoles = require('../middlewares/verify_roles');
+const verifyRoles = require('../middlewares/verify_role');
 const { verifyAdminSession } = require('../middlewares/verify_admin_session');
 const router = require('express').Router();
 const requestCache = require('../config/log_cache_config');
@@ -110,18 +110,18 @@ router.use(
           await uploadBackupData(backupData, filename);
           res.send('Backup created and uploaded successfully!');
         } catch (uploadError) {
-          // eslint-disable-next-line no-undef, no-console
+          
           console.error(uploadError);
           res.status(500).send('Error uploading backup to Firebase!');
         }
       });
 
       child.stderr.on('data', (data) => {
-        // eslint-disable-next-line no-undef, no-console
+        
         console.error(`stderr: ${data}`);
       });
     } catch (error) {
-      // eslint-disable-next-line no-undef, no-console
+      
       console.error(error);
       res.status(500).send('Could not create a backup!');
     } finally {

@@ -1,3 +1,6 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-console */
+
 const userData = require('../queries/user_data');
 
 const accountStatus = require('../config/accountStatus');
@@ -24,7 +27,6 @@ const removeUser = async (req, res) => {
       message: 'Internal Server Error!',
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -57,7 +59,6 @@ const getAllUsers = async (req, res) => {
       body: result,
     });
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -92,7 +93,6 @@ const getUser = async (req, res) => {
       });
     }
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -129,7 +129,6 @@ const suspendUser = async (req, res) => {
       });
     }
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,
@@ -167,7 +166,6 @@ const activateUser = async (req, res) => {
       });
     }
   } catch (error) {
-    // eslint-disable-next-line no-undef, no-console
     console.log(error);
     return res.status(500).json({
       success: false,

@@ -1,8 +1,8 @@
 const router = require('express').Router();
 const Roles = require('../config/roles');
-const userController = require('../controllers/user_controller');
-const verifyRoles = require('../middlewares/verify_roles');
-const { verifySession } = require('../middlewares/verify_user_session');
+const userController = require('../controllers/controller.user');
+const verifyRoles = require('../middlewares/verify_role');
+const { verifySession } = require('../middlewares/verify_session');
 
 router.delete(
   '/remove/:id',
