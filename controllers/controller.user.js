@@ -1,9 +1,8 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
 
-const userData = require('../queries/user_data');
-
-const accountStatus = require('../config/accountStatus');
+const userData = require('../queries/query.user');
+const accountStatus = require('../config/account_status');
 
 const removeUser = async (req, res) => {
   try {

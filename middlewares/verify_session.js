@@ -5,7 +5,7 @@ const {
   deleteUserSession,
 } = require('../queries/session_data');
 
-const verifySession = async (req, res, next) => {
+const verifyAuth = async (req, res, next) => {
   try {
     const cookies = req?.cookies;
     if (!cookies?.sessionId) {

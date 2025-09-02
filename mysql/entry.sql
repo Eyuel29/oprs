@@ -51,11 +51,3 @@ INSERT INTO passwords(userId, pass) VALUES
 (8 ,'ycpzpjbk'),
 (9 ,'suypgxgr'),
 (10,'zavkbinq');
-
-https://checkout.chapa.co/checkout/payment/ozWUtfkUZcKAPMllhdjDcB8y3BG5ol9gVp8Yb2AaJMZrL
-
-git add .
-git commit -m"---"
-git push -u origin main
-
-https://checkout.chapa.co/checkout/payment/lfg5ERR2q6oiBbOyXEsij3OSWSCH7krF9pMlaBi5qtDF3

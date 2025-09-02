@@ -4,11 +4,11 @@
 const {
   getVerificationKey,
   createVerificationKey,
-} = require('../queries/verification_data');
-const { changeUserStatus, getUser } = require('../queries/user_data');
+} = require('../queries/query.verification');
+const { changeUserStatus, getUser } = require('../queries/query.user');
 
-const sendCodeToEmail = require('../utils/emailer');
-const accountStatus = require('../config/accountStatus');
+const sendCodeToEmail = require('../utils/email');
+const accountStatus = require('../config/account_status');
 const crypto = require('crypto');
 
 const verifyPost = async (req, res) => {

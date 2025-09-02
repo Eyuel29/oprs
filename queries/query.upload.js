@@ -10,7 +10,7 @@ const {
   listAll,
 } = require('firebase/storage');
 
-const app = require('../config/firebase_config');
+const app = require('../config/firebase.config');
 const storage = getStorage(app);
 
 const handleFileUpload = multer({

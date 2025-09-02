@@ -1,9 +1,9 @@
 /* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
-const reviewData = require('../queries/review_data');
-const agreementData = require('../queries/agreement_data');
-const { getUser } = require('../queries/user_data');
+const reviewData = require('../queries/query.review');
+const agreementData = require('../queries/query.agreement');
+const { getUser } = require('../queries/query.user');
 
 const deleteReview = async (req, res) => {
   try {
@@ -137,7 +137,8 @@ const createReview = async (req, res) => {
       });
     }
 
-    const { reviewMessage, rating, reviewedListingId, authorName, receiverId } = req?.body;
+    const { reviewMessage, rating, reviewedListingId, authorName, receiverId } =
+      req?.body;
 
     const userToReview = await getUser(receiverId);
     if (userToReview.userId === authorId) {

@@ -33,7 +33,7 @@ const verifyActive = async (req, res, next) => {
           success: false,
           message: 'Your account has been suspended!',
         });
-      case accountStatus.INCATIVE:
+      case accountStatus.INACTIVE:
         return res.status(403).json({
           success: false,
           message: 'Please verify your acccount!',

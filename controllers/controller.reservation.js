@@ -1,13 +1,12 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
 /* eslint-disable no-unsafe-optional-chaining */
-const reservationData = require('../queries/reservation_data');
-const notificationData = require('../queries/notification_data');
-const agreementData = require('../queries/agreement_data');
-const listingData = require('../queries/listing_data');
-
+const reservationData = require('../queries/query.reservation');
+const notificationData = require('../queries/query.notification');
+const agreementData = require('../queries/query.agreement');
+const listingData = require('../queries/query.listing');
+const { notificationTypes } = require('../utils/constants');
 const { getDate } = require('../utils/date');
-const notificationTypes = require('../config/notification_types');
 
 const requestReservation = async (req, res) => {
   try {

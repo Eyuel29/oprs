@@ -1,50 +1,50 @@
 const router = require('express').Router();
 const verifyRoles = require('../middlewares/verify_role');
-const Roles = require('../config/roles');
+const { userRoles } = require('../utils/constants');
 const listingController = require('../controllers/controller.listing');
 const { verifySession } = require('../middlewares/verify_session');
 
 router.post(
   '/create',
   verifySession,
-  verifyRoles(Roles.OWNER),
+  verifyRoles(userRoles.OWNER),
   listingController.createListing
 );
 router.delete(
   '/remove/:id',
   verifySession,
-  verifyRoles(Roles.OWNER, Roles.ADMIN),
+  verifyRoles(userRoles.OWNER, userRoles.ADMIN),
   listingController.removeListing
 );
 router.put(
   '/modify/:id',
   verifySession,
-  verifyRoles(Roles.OWNER),
+  verifyRoles(userRoles.OWNER),
   listingController.modifyListing
 );
 router.put(
   '/setAvailable/:id',
   verifySession,
-  verifyRoles(Roles.OWNER),
+  verifyRoles(userRoles.OWNER),
   listingController.setAvaliable
 );
 router.put(
   '/setUnAvailable/:id',
   verifySession,
-  verifyRoles(Roles.OWNER),
+  verifyRoles(userRoles.OWNER),
   listingController.setUnAvaliable
 );
 router.get('/page/:page', verifySession, listingController.getPageListing);
 router.get(
   '/owner',
   verifySession,
-  verifyRoles(Roles.OWNER),
+  verifyRoles(userRoles.OWNER),
   listingController.getOwnerListing
 );
 router.get(
   '/search/:page/:q',
   verifySession,
-  verifyRoles(Roles.TENANT),
+  verifyRoles(userRoles.TENANT),
   listingController.getMatchingListing
 );
 router.get('/get/:id', verifySession, listingController.getListing);

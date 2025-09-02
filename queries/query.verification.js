@@ -1,4 +1,4 @@
-const pool = require('../config/db');
+const pool = require('../config/db.config');
 require('dotenv').config();
 
 const createVerificationKey = async (userId, key, createdAt, expiresAt) => {

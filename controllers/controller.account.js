@@ -1,19 +1,19 @@
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
 /* eslint-disable no-unsafe-optional-chaining */
-const userData = require('../queries/user_data');
-const sessionData = require('../queries/session_data');
-const agreementData = require('../queries/agreement_data');
+const userData = require('../queries/query.user');
+const sessionData = require('../queries/query.session');
+const agreementData = require('../queries/query.agreement');
+const { handleFileUpload, uploadPhoto } = require('../queries/query.upload');
 const {
   createVerificationKey,
   getVerificationKey,
-} = require('../queries/verification_data');
-const { handleFileUpload, uploadPhoto } = require('../queries/upload_data');
-const { getUserByEmail } = require('../queries/user_data');
+} = require('../queries/query.verification');
+const { getUserByEmail } = require('../queries/query.user');
+const sendCodeToEmail = require('../utils/email');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 
-const sendCodeToEmail = require('../utils/emailer');
 const signout = async (req, res) => {
   const cookies = req.cookies;
   if (!cookies?.sessionId && !req?.userId) {

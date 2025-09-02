@@ -2,12 +2,12 @@
 /* eslint-disable no-console */
 /* eslint-disable camelcase */
 /* eslint-disable no-unsafe-optional-chaining */
-const notificationData = require('../queries/notification_data');
-const notificationTypes = require('../config/notification_types');
-const paymentData = require('../queries/payment_data');
 
+const notificationTypes = require('../config/notification_types');
+const notificationData = require('../queries/query.notification');
+const paymentData = require('../queries/query.payment');
+const { getUser } = require('../queries/query.user');
 const { getDate } = require('../utils/date');
-const { getUser } = require('../queries/user_data');
 const crypto = require('crypto');
 const instance = require('axios');
 const CSK = process.env.CSK;

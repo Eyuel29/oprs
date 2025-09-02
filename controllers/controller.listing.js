@@ -2,13 +2,13 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-unsafe-optional-chaining */
 
-const listingData = require('../queries/listing_data');
+const listingData = require('../queries/query.listing');
 
 const {
   handleFileUpload,
   uploadPhoto,
   deleteFolder,
-} = require('../queries/upload_data');
+} = require('../queries/query.upload');
 
 const { getDate } = require('../utils/date');
 

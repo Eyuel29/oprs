@@ -1,20 +1,23 @@
-const Roles = require('../config/roles');
-const pool = require('../config/db');
-const path = require('path');
-const storage = require('../config/firebase_config');
+const { userRoles } = require('../utils/constants');
+const pool = require('../config/db.config');
+const storage = require('../config/firebase.config');
 const { ref, uploadBytes } = require('firebase/storage');
 const verifyRoles = require('../middlewares/verify_role');
 const { verifyAdminSession } = require('../middlewares/verify_admin_session');
 const router = require('express').Router();
-const requestCache = require('../config/log_cache_config');
+const requestCache = require('../config/cache.config');
 const { exec } = require('child_process');
-const userData = require('../queries/user_data');
-const listingData = require('../queries/listing_data');
+const userData = require('../queries/query.user');
+const listingData = require('../queries/query.listing');
 const { Readable } = require('stream');
 const { Buffer } = require('buffer');
+const path = require('path');
 
-router.use('/home', verifyAdminSession, verifyRoles(Roles.ADMIN), (req, res) =>
-  res.redirect('/admin/metrics')
+router.use(
+  '/home',
+  verifyAdminSession,
+  verifyRoles(userRoles.ADMIN),
+  (req, res) => res.redirect('/admin/metrics')
 );
 router.use('/signin', (req, res) =>
   res.sendFile(path.join(__dirname, '..', 'public/signin.html'))
@@ -22,7 +25,7 @@ router.use('/signin', (req, res) =>
 router.use(
   '/signout',
   verifyAdminSession,
-  verifyRoles(Roles.ADMIN),
+  verifyRoles(userRoles.ADMIN),
   (req, res) => {
     res.clearCookie();
     res.redirect('/');
@@ -32,31 +35,37 @@ router.use(
 router.use(
   '/metrics',
   verifyAdminSession,
-  verifyRoles(Roles.ADMIN),
+  verifyRoles(userRoles.ADMIN),
   (req, res) => res.render('metrics-view')
 );
-router.use('/users', verifyAdminSession, verifyRoles(Roles.ADMIN), (req, res) =>
-  res.render('user-view')
+router.use(
+  '/users',
+  verifyAdminSession,
+  verifyRoles(userRoles.ADMIN),
+  (req, res) => res.render('user-view')
 );
 router.use(
   '/listings',
   verifyAdminSession,
-  verifyRoles(Roles.ADMIN),
+  verifyRoles(userRoles.ADMIN),
   (req, res) => res.render('listing-view')
 );
-router.use('/log', verifyAdminSession, verifyRoles(Roles.ADMIN), (req, res) =>
-  res.render('log-view')
+router.use(
+  '/log',
+  verifyAdminSession,
+  verifyRoles(userRoles.ADMIN),
+  (req, res) => res.render('log-view')
 );
 router.use(
   '/backup',
   verifyAdminSession,
-  verifyRoles(Roles.ADMIN),
+  verifyRoles(userRoles.ADMIN),
   (req, res) => res.render('backup-view')
 );
 router.use(
   '/payments',
   verifyAdminSession,
-  verifyRoles(Roles.ADMIN),
+  verifyRoles(userRoles.ADMIN),
   (req, res) => res.render('payment-refrence-view')
 );
 
@@ -88,7 +97,7 @@ const uploadBackupData = async (dataBuffer, filename) => {
 router.use(
   '/createBackup',
   verifyAdminSession,
-  verifyRoles(Roles.ADMIN),
+  verifyRoles(userRoles.ADMIN),
   async (req, res) => {
     const connection = await pool.getConnection();
     try {
@@ -110,18 +119,15 @@ router.use(
           await uploadBackupData(backupData, filename);
           res.send('Backup created and uploaded successfully!');
         } catch (uploadError) {
-          
           console.error(uploadError);
           res.status(500).send('Error uploading backup to Firebase!');
         }
       });
 
       child.stderr.on('data', (data) => {
-        
         console.error(`stderr: ${data}`);
       });
     } catch (error) {
-      
       console.error(error);
       res.status(500).send('Could not create a backup!');
     } finally {

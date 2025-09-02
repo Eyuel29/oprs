@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-catch */
 require('dotenv').config();
-const pool = require('../config/db');
+const pool = require('../config/db.config');
 
 const createUser = async (user, contactInfo, photoUrl) => {
   const connection = await pool.getConnection();

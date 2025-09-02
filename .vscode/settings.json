@@ -1,0 +1,11 @@
+{
+  "files.watcherExclude": {
+    "public/xlsx.full.min.js": true
+  },
+  "search.exclude": {
+    "public/xlsx.full.min.js": true
+  },
+  "files.readonlyInclude": {
+    "public/xlsx.full.min.js": true
+  }
+}

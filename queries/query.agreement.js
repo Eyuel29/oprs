@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-catch */
 require('dotenv').config();
-const pool = require('../config/db');
+const pool = require('../config/db.config');
 
 const createAgreement = async (agreement, leaseDuration, checkInDate) => {
   const connection = await pool.getConnection();

@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
-const notificationData = require('../queries/notification_data');
+const notificationData = require('../queries/query.notification');
 
 const getUserNotifications = async (req, res) => {
   try {

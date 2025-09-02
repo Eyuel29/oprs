@@ -1,4 +1,4 @@
-const allowedOrigins = require('./allowed_origins');
+const allowedOrigins = ['http://localhost:3000'];
 
 module.exports = {
   origin: (origin, callback) => {
